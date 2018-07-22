@@ -28,4 +28,5 @@ User has authorization to access T-Code:MB5B
 
 ## Note
 * This report is tested under SAP Netweaver 7.40 enviroment Don't know how it's going to behave on earlier versions
+* It's not tested on S4Hana but it's supposed to work same as ERP 6.0 as it's built on MB5B standard report
 * For complete illustration check this [SCN blog](https://blogs.sap.com/2018/07/22/inventory-ageing-abap-report/)

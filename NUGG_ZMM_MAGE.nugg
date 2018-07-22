@@ -1,0 +1,1684 @@
+<?xml version="1.0" encoding="utf-16"?>
+<nugget name="ZMM_MAGE">
+ <PROG NAME="ZMM_MAGE_TOP" VARCL="X" SUBC="I" CNAM="IBR.AHMED" CDAT="20160727" UNAM="IBR.AHMED" UDAT="20180624" VERN="000115" RMAND="100" RLOAD="E" SDATE="20180624" STIME="174638" IDATE="20180624" ITIME="174638" UCCHECK="X">
+  <textPool>
+   <language SPRAS="E">
+    <textElement ID="R" ENTRY="Include ZMM_MAGE_TOP" LENGTH="20 "/>
+   </language>
+  </textPool>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp;  Include           ZMM_MAGE_TOP
+*&amp;---------------------------------------------------------------------*
+
+ DATA PERCE TYPE P LENGTH 16 DECIMALS 8.
+  DATA COUNT TYPE N LENGTH 5.
+  DATA MSG TYPE CHAR50.
+
+  DATA: gr_alv TYPE REF TO cl_salv_table,
+        gr_columns TYPE REF TO cl_salv_columns_table,
+        gr_functions TYPE REF TO cl_salv_functions_list,
+        gr_sorts      TYPE REF TO cl_salv_sorts,
+        gr_column TYPE REF TO cl_salv_column_table,
+        gr_layout TYPE REF TO CL_SALV_LAYOUT,
+        gs_key    type salv_s_layout_key,
+        restrict  type salv_de_layout_restriction,
+        not_found TYPE REF TO cx_salv_not_found.
+        DATA: colorq TYPE lvc_s_colo.
+        DATA: colorv TYPE lvc_s_colo.
+DATA DUMMY TYPE CHAR50.
+
+  types : begin of ty_list,
+                 text(1024) type c,
+                end of ty_list.
+
+  DATA : IS_RSPAR type RSPARAMS,
+       IT_RSPAR type table of RSPARAMS.
+
+  &quot;main table structure
+TYPES : BEGIN OF OUT,
+    MATNR TYPE MATNR,
+    MAKTX TYPE MAKTX,
+    WERKS TYPE WERKS_D,
+    MTART TYPE MTART,
+    MTBEZ TYPE MTBEZ,
+    WRKST TYPE MARA-WRKST,
+
+    LBKUM TYPE LBKUM, &quot;STOCK
+    SALK3 TYPE SALK3, &quot;VALUE
+
+    LBKUM_30 TYPE LBKUM, &quot;00 TO 30 QUANTITY
+    SALK3_30 TYPE SALK3, &quot;00 TO 30 VALUE
+
+    LBKUM_60 TYPE LBKUM, &quot;31 TO 60 QUANTITY
+    SALK3_60 TYPE SALK3, &quot;31 TO 60 VALUE
+
+    LBKUM_90 TYPE LBKUM, &quot;61 TO 90 QUANTITY
+    SALK3_90 TYPE SALK3, &quot;61 TO 90 VALUE
+
+    LBKUM_180 TYPE LBKUM, &quot;91 TO 180 QUANTITY
+    SALK3_180 TYPE SALK3, &quot;91 TO 180 VALUE
+
+    LBKUM_360 TYPE LBKUM, &quot;181 TO 360 QUANTITY
+    SALK3_360 TYPE SALK3, &quot;181 TO 360 VALUE
+
+    LBKUM_1Y6M TYPE LBKUM, &quot;1Y TO 1Y6M QUANTITY
+    SALK3_1Y6M TYPE SALK3, &quot;1Y TO 1Y6M VALUE
+
+    LBKUM_2Y TYPE LBKUM, &quot;1Y6M TO 2Y QUANTITY
+    SALK3_2Y TYPE SALK3, &quot;1Y6M TO 2Y VALUE
+
+    LBKUM_2Y6M TYPE LBKUM, &quot;2Y TO 2Y6M QUANTITY
+    SALK3_2Y6M TYPE SALK3, &quot;2Y TO 2Y6M VALUE
+
+    LBKUM_999 TYPE LBKUM, &quot;2Y6M TO 999 QUANTITY
+    SALK3_999 TYPE SALK3, &quot;2Y6M TO 999 VALUE
+
+  END OF OUT.
+
+  DATA IT_OUT TYPE TABLE OF OUT.
+  DATA WA_OUT TYPE OUT.
+  FIELD-SYMBOLS &lt;OUT&gt; TYPE OUT.
+
+&quot;temp for memory return
+TYPES : BEGIN OF TMP,
+    MATNR TYPE MATNR,
+    MAKTX TYPE MAKTX,
+    WERKS TYPE WERKS_D,
+
+    LBKUM TYPE CHAR50, &quot;STOCK
+    SALK3 TYPE CHAR50, &quot;VALUE
+
+    LBKUM_30 TYPE CHAR50, &quot;00 TO 30 QUANTITY
+    SALK3_30 TYPE CHAR50, &quot;00 TO 30 VALUE
+
+    LBKUM_60 TYPE CHAR50, &quot;31 TO 60 QUANTITY
+    SALK3_60 TYPE CHAR50, &quot;31 TO 60 VALUE
+
+    LBKUM_90 TYPE CHAR50, &quot;61 TO 90 QUANTITY
+    SALK3_90 TYPE CHAR50, &quot;61 TO 90 VALUE
+
+    LBKUM_180 TYPE CHAR50, &quot;91 TO 180 QUANTITY
+    SALK3_180 TYPE CHAR50, &quot;91 TO 180 VALUE
+
+    LBKUM_360 TYPE CHAR50, &quot;181 TO 360 QUANTITY
+    SALK3_360 TYPE CHAR50, &quot;181 TO 360 VALUE
+
+    LBKUM_1Y6M TYPE CHAR50, &quot;361 TO 999 QUANTITY
+    SALK3_1Y6M TYPE CHAR50, &quot;361 TO 999 VALUE
+
+    LBKUM_2Y TYPE CHAR50, &quot;361 TO 999 QUANTITY
+    SALK3_2Y TYPE CHAR50, &quot;361 TO 999 VALUE
+
+    LBKUM_2Y6M TYPE CHAR50, &quot;361 TO 999 QUANTITY
+    SALK3_2Y6M TYPE CHAR50, &quot;361 TO 999 VALUE
+
+    LBKUM_999 TYPE CHAR50, &quot;361 TO 999 QUANTITY
+    SALK3_999 TYPE CHAR50, &quot;361 TO 999 VALUE
+
+
+  END OF TMP.
+
+  DATA IT_TMP TYPE TABLE OF TMP.
+  DATA WA_TMP TYPE TMP.
+
+TYPES : BEGIN OF PERIODS,
+    MATNR TYPE MATNR,
+    WERKS TYPE WERKS_D,
+
+    LBKUM TYPE CHAR50, &quot;STOCK
+    SALK3 TYPE CHAR50, &quot;VALUE
+  END OF PERIODS.
+
+  DATA IT_3060 TYPE TABLE OF PERIODS.
+  DATA WA_3060 TYPE PERIODS.
+  DATA IT_6190 TYPE TABLE OF PERIODS.
+  DATA WA_6190 TYPE PERIODS.
+  DATA IT_91180 TYPE TABLE OF PERIODS.
+  DATA WA_91180 TYPE PERIODS.
+  DATA IT_181360 TYPE TABLE OF PERIODS.
+  DATA WA_181360 TYPE PERIODS.
+  DATA IT_1Y_1Y6M TYPE TABLE OF PERIODS.
+  DATA WA_1Y_1Y6M TYPE PERIODS.
+  DATA IT_1Y6M_2Y TYPE TABLE OF PERIODS.
+  DATA WA_1Y6M_2Y TYPE PERIODS.
+  DATA IT_2Y_2Y6M TYPE TABLE OF PERIODS.
+  DATA WA_2Y_2Y6M TYPE PERIODS.
+
+TYPES : BEGIN OF TMP_PERIODS,
+    MATNR TYPE MATNR,
+    WERKS TYPE WERKS_D,
+
+    LBKUM TYPE CHAR50, &quot;STOCK
+    SALK3 TYPE CHAR50, &quot;VALUE
+  END OF TMP_PERIODS.
+
+  DATA IT_TMP_3060 TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_3060 TYPE TMP_PERIODS.
+  DATA IT_TMP_6190 TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_6190 TYPE TMP_PERIODS.
+  DATA IT_TMP_91180 TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_91180 TYPE TMP_PERIODS.
+  DATA IT_TMP_181360 TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_181360 TYPE TMP_PERIODS.
+  DATA IT_TMP_1Y_1Y6M TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_1Y_1Y6M TYPE TMP_PERIODS.
+  DATA IT_TMP_1Y6M_2Y TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_1Y6M_2Y TYPE TMP_PERIODS.
+  DATA IT_TMP_2Y_2Y6M TYPE TABLE OF TMP_PERIODS.
+  DATA WA_TMP_2Y_2Y6M TYPE TMP_PERIODS.
+
+  DATA: TMP_30    TYPE LBKUM,
+        TMP_60    TYPE LBKUM,
+        TMP_90    TYPE LBKUM,
+        TMP_180   TYPE LBKUM,
+        TMP_360   TYPE LBKUM,
+        TMP_1Y6M  TYPE LBKUM,
+        TMP_2Y    TYPE LBKUM,
+        TMP_2Y6M  TYPE LBKUM,
+        TMP_999   TYPE LBKUM.
+
+  DATA: TMP_30V   TYPE LBKUM,
+        TMP_60V   TYPE LBKUM,
+        TMP_90V   TYPE LBKUM,
+        TMP_180V  TYPE LBKUM,
+        TMP_360V  TYPE LBKUM,
+        TMP_1Y6MV TYPE LBKUM,
+        TMP_2YV   TYPE LBKUM,
+        TMP_2Y6MV TYPE LBKUM,
+        TMP_999V  TYPE LBKUM.
+
+  DATA: IT_LIST type standard table of ABAPLIST,
+        IT_LIST1 type standard table of ty_list,
+        WA_LIST1 type  ty_list.
+
+  DATA : XD TYPE DATUM,
+         XD1 TYPE DATUM,
+         XD2 TYPE DATUM,
+         XD3 TYPE DATUM,
+         XD4 TYPE DATUM,
+         XD5 TYPE DATUM,
+         XD6 TYPE DATUM,
+         XD7 TYPE DATUM.
+
+  SELECTION-SCREEN BEGIN OF BLOCK SEL WITH FRAME TITLE TEXT-100.
+  SELECT-OPTIONS :
+  &quot;select options
+    S_MATNR FOR MARC-MATNR,
+    S_WERKS FOR MARC-WERKS,
+    S_MTART FOR MARA-MTART.
+    PARAMETERS S_DATE TYPE DATUM DEFAULT SY-DATUM.
+    PARAMETERS P_EXTEND AS CHECKBOX.
+
+  SELECTION-SCREEN END OF BLOCK SEL.</source>
+ </PROG>
+ <PROG NAME="ZMM_MAGE_FORM" VARCL="X" SUBC="I" CNAM="IBR.AHMED" CDAT="20160727" UNAM="IBR.AHMED" UDAT="20180624" VERN="000102" RMAND="100" RLOAD="E" SDATE="20180624" STIME="175446" IDATE="20180624" ITIME="175446" UCCHECK="X">
+  <textPool>
+   <language SPRAS="E">
+    <textElement ID="R" ENTRY="Include ZMM_MAGE_FORM" LENGTH="21 "/>
+   </language>
+  </textPool>
+  <source>*----------------------------------------------------------------------*
+***INCLUDE ZMM_MAGE_FORM.
+*----------------------------------------------------------------------*
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  ALV_DISPLAY
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM ALV_DISPLAY .
+   &quot;DISPLAY ALV
+    CALL METHOD cl_salv_table=&gt;factory
+    IMPORTING
+      r_salv_table = gr_alv
+    CHANGING
+      t_table      = IT_OUT.
+
+&quot;status
+    gr_alv-&gt;set_screen_status(
+      pfstatus = &apos;ZSALV_STANDARD1&apos;
+      report = sy-repid
+*      i_save = &apos;A&apos;
+      set_functions = gr_alv-&gt;c_functions_all ).
+
+
+&quot;SET COLOMN
+  gr_columns = gr_alv-&gt;get_columns( ).
+  gr_columns-&gt;SET_OPTIMIZE( ).
+&quot;SET KEY
+  gr_column ?= gr_columns-&gt;get_column( &apos;MATNR&apos; ).
+  GR_COLUMN-&gt;SET_KEY( abap_true ).
+&quot;sort
+  gr_sorts = gr_alv-&gt;GET_SORTS( ).
+  gr_sorts-&gt;ADD_SORT( &apos;MATNR&apos; ) .
+  gr_sorts-&gt;ADD_SORT( &apos;MAKTX&apos; ) .
+
+colorq-COL = 7.
+colorq-INV = 0.
+colorq-INT = 0.
+
+colorv-COL = 5.
+colorv-INV = 0.
+colorv-INT = 0.
+
+  gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_30&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;00-30&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;00-30&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;00-30&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorq ).
+  gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_30&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;00-30 V&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;00-30 Value&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;00-30 Value&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+  gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_60&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;31-60&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;31-60&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;31-60&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorq ).
+  gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_60&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;31-60 V&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;31-60 Value&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;31-60 Value&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+  gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_90&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;61-90&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;61-90&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;61-90&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorq ).
+  gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_90&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;61-90 V&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;61-90 Value&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;61-90 Value&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+  gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_180&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;91-180&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;91-180&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;91-180&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorq ).
+  gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_180&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;91-180 V&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;91-180 Value&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;91-180 Value&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+  gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_360&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;181-360&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;181-360&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;181-360&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorq ).
+  gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_360&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;181-360 V&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;181-360 Value&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;181-360 Value&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+  gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_999&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;361-999&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;361-999&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;361-999&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorq ).
+  gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_999&apos; ).
+  GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;361-999 V&apos; ).
+  GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;361-999 Value&apos; ).
+  GR_COLUMN-&gt;SET_LONG_TEXT( &apos;361-999 Value&apos; ).
+  GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+  IF P_EXTEND = &apos;X&apos;.
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;361-1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;361-1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;361-1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorq ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;361-1Y6M V&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;361-1Y6M Value&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;361-1Y6M Value&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_2Y&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;1Y6M-2Y&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;1Y6M-2Y&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;1Y6M-2Y&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorq ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_2Y&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;1Y6M-2Y V&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;1Y6M-2Y Value&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;1Y6M-2Y Value&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;2Y-2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;2Y-2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;2Y-2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorq ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;2Y-2Y6M V&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;2Y-2Y6M Value&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;2Y-2Y6M Value&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorv ).
+
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_999&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;2Y6M-999&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;2Y6M-999&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;2Y6M-999&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorq ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_999&apos; ).
+    GR_COLUMN-&gt;SET_SHORT_TEXT( &apos;2Y6M-999 V&apos; ).
+    GR_COLUMN-&gt;SET_MEDIUM_TEXT( &apos;2Y6M-999 Value&apos; ).
+    GR_COLUMN-&gt;SET_LONG_TEXT( &apos;2Y6M-999 Value&apos; ).
+    GR_COLUMN-&gt;SET_COLOR( colorv ).
+  ELSE.
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_VISIBLE( value = if_salv_c_bool_sap=&gt;false ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_1Y6M&apos; ).
+    GR_COLUMN-&gt;SET_VISIBLE( value = if_salv_c_bool_sap=&gt;false ).
+
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_2Y&apos; ).
+    GR_COLUMN-&gt;SET_VISIBLE( value = if_salv_c_bool_sap=&gt;false ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_2Y&apos; ).
+    GR_COLUMN-&gt;SET_VISIBLE( value = if_salv_c_bool_sap=&gt;false ).
+
+    gr_column ?= gr_columns-&gt;get_column( &apos;LBKUM_2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_VISIBLE( value = if_salv_c_bool_sap=&gt;false ).
+    gr_column ?= gr_columns-&gt;get_column( &apos;SALK3_2Y6M&apos; ).
+    GR_COLUMN-&gt;SET_VISIBLE( value = if_salv_c_bool_sap=&gt;false ).
+
+  ENDIF.
+&quot;Layout
+ restrict = if_salv_c_layout=&gt;RESTRICT_USER_DEPENDANT.
+ gr_layout  = gr_alv-&gt;get_layout( ). &quot;layouts
+ gs_key-REPORT = sy-repid.
+ gr_layout-&gt;set_key( gs_key ).  &quot;Pass Program Name
+ gr_layout-&gt;set_save_restriction( if_salv_c_layout=&gt;restrict_none ). &quot;User can save
+ gr_layout-&gt;set_default( abap_true ).
+
+gr_functions = gr_alv-&gt;get_functions( ).
+ gr_functions-&gt;set_group_filter( value = if_salv_c_bool_sap=&gt;false ).
+* Set print preview
+gr_functions-&gt;set_print_preview( ).
+
+gr_alv-&gt;get_display_settings( ).
+
+  gr_alv-&gt;display( ).
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  PROCESS_DATA
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM PROCESS_DATA .
+*  DATA IT_PRIC TYPE TABLE OF MBEW.
+*  DATA WA_PRIC TYPE MBEW.
+*  DATA TMP_PRIC TYPE P LENGTH 12 DECIMALS 7.
+
+*  SELECT *
+*    FROM MBEW
+*    INTO TABLE IT_PRIC.
+
+DESCRIBE TABLE IT_OUT LINES COUNT.
+
+LOOP AT IT_OUT ASSIGNING &lt;OUT&gt;.
+  CLEAR : WA_3060, WA_6190, WA_181360, WA_6190,
+          TMP_60, TMP_90, TMP_180, TMP_360, TMP_1Y6M, TMP_2Y, TMP_2Y6M, TMP_999,
+          TMP_60V, TMP_90V, TMP_180V, TMP_360V, TMP_1Y6MV,TMP_2YV,TMP_2Y6MV,TMP_999V.&quot; WA_PRIC, TMP_PRIC.
+*****************************************************************************************
+*      SET STATUS
+*****************************************************************************************
+    CONCATENATE &apos;Processing Material&apos; &lt;OUT&gt;-MATNR into msg SEPARATED BY space.
+    PERCE = SY-TABIX / COUNT * 100.
+    CALL FUNCTION &apos;SAPGUI_PROGRESS_INDICATOR&apos;
+     EXPORTING
+       PERCENTAGE       = PERCE
+       TEXT             = msg.
+
+    &quot;exit if current stock = 0
+    IF &lt;OUT&gt;-LBKUM = 0.
+      CONTINUE.
+    ENDIF.
+
+    READ TABLE IT_3060    INTO WA_3060    WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+    READ TABLE IT_6190    INTO WA_6190    WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+    READ TABLE IT_91180   INTO WA_91180   WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+    READ TABLE IT_181360  INTO WA_181360  WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+    IF P_EXTEND = &apos;X&apos;.
+      READ TABLE IT_1Y_1Y6M INTO WA_1Y_1Y6M  WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+      READ TABLE IT_1Y6M_2Y INTO WA_1Y6M_2Y WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+      READ TABLE IT_2Y_2Y6M INTO WA_2Y_2Y6M WITH KEY MATNR = &lt;OUT&gt;-MATNR WERKS = &lt;OUT&gt;-WERKS.
+    ENDIF.
+
+    &quot;READ MATERIAL PRICE
+*    READ TABLE IT_PRIC INTO WA_PRIC WITH KEY MATNR = &lt;OUT&gt;-MATNR BWKEY = &lt;OUT&gt;-WERKS.
+
+    TMP_60    = &lt;OUT&gt;-LBKUM - &lt;OUT&gt;-LBKUM_30.
+    TMP_90    = TMP_60      - WA_3060-LBKUM.
+    TMP_180   = TMP_90      - WA_6190-LBKUM.
+    TMP_360   = TMP_180     - WA_91180-LBKUM.
+    TMP_999   = TMP_360     - WA_181360-LBKUM.
+
+    IF P_EXTEND = &apos;X&apos;.
+      TMP_1Y6M  = TMP_360     - WA_181360-LBKUM.
+      TMP_2Y    = TMP_1Y6M    - WA_1Y_1Y6M-LBKUM.
+      TMP_2Y6M  = TMP_2Y    - WA_1Y6M_2Y-LBKUM.
+      TMP_999   = TMP_2Y6M    - WA_2Y_2Y6M-LBKUM.  &quot;OVERWIRE TMP_999
+    ENDIF.
+
+    TMP_60V    = &lt;OUT&gt;-SALK3 - &lt;OUT&gt;-SALK3_30.
+    TMP_90V    = TMP_60V   - WA_3060-SALK3.
+    TMP_180V   = TMP_90V   - WA_6190-SALK3.
+    TMP_360V   = TMP_180V  - WA_91180-SALK3.
+    TMP_999V   = TMP_360V  - WA_181360-SALK3.
+
+    IF P_EXTEND = &apos;X&apos;.
+      TMP_1Y6MV  = TMP_360V  - WA_181360-SALK3.
+      TMP_2YV    = TMP_1Y6MV - WA_1Y_1Y6M-SALK3.
+      TMP_2Y6MV  = TMP_2YV - WA_1Y6M_2Y-SALK3.
+      TMP_999V   = TMP_2Y6MV - WA_2Y_2Y6M-SALK3.  &quot;OVERWIRE TMP_999V
+    ENDIF.
+**********************************************************************
+&quot;CALCULATE AVERAGE PRICE
+**********************************************************************
+
+    &quot;EXIT IF RECIETS IS LESS THAN CURRENT STOCK
+    IF &lt;OUT&gt;-LBKUM_30 &gt; &lt;OUT&gt;-LBKUM.
+      &lt;OUT&gt;-LBKUM_30 = &lt;OUT&gt;-LBKUM.
+      &lt;OUT&gt;-SALK3_30 = &lt;OUT&gt;-SALK3.
+      CONTINUE.
+    ENDIF.
+*&quot;30-60
+      IF TMP_60 &gt; WA_3060-LBKUM.
+         &lt;OUT&gt;-LBKUM_60 = WA_3060-LBKUM .
+         &lt;OUT&gt;-SALK3_60 = WA_3060-SALK3 .
+      ELSE.
+         &lt;OUT&gt;-LBKUM_60 = TMP_60 .
+         &lt;OUT&gt;-SALK3_60 = TMP_60V .
+         CONTINUE.
+      ENDIF.
+
+*&quot;61-90
+      IF TMP_90 &gt; WA_6190-LBKUM.
+         &lt;OUT&gt;-LBKUM_90 = WA_6190-LBKUM .
+         &lt;OUT&gt;-SALK3_90 = WA_6190-SALK3 .
+      ELSE.
+         &lt;OUT&gt;-LBKUM_90 = TMP_90 .
+         &lt;OUT&gt;-SALK3_90 = TMP_90V .
+         CONTINUE.
+    ENDIF.
+*
+*&quot;91-180
+      IF TMP_180 &gt; WA_91180-LBKUM.
+         &lt;OUT&gt;-LBKUM_180 = WA_91180-LBKUM.
+         &lt;OUT&gt;-SALK3_180 = WA_91180-SALK3.
+      ELSE.
+         &lt;OUT&gt;-LBKUM_180 = TMP_180 .
+         &lt;OUT&gt;-SALK3_180 = TMP_180V .
+         CONTINUE.
+      ENDIF.
+*&quot;181-360
+      IF TMP_360 &gt; WA_181360-LBKUM.
+         &lt;OUT&gt;-LBKUM_360 = WA_181360-LBKUM.
+         &lt;OUT&gt;-SALK3_360 = WA_181360-SALK3.
+      ELSE.
+         &lt;OUT&gt;-LBKUM_360 = TMP_360 .
+         &lt;OUT&gt;-SALK3_360 = TMP_360V .
+         CONTINUE.
+      ENDIF.
+
+
+      IF P_EXTEND = &apos;X&apos;.
+*      &quot;1Y-1Y6M
+            IF TMP_1Y6M &gt; WA_1Y_1Y6M-LBKUM.
+               &lt;OUT&gt;-LBKUM_1Y6M = WA_1Y_1Y6M-LBKUM.
+               &lt;OUT&gt;-SALK3_1Y6M = WA_1Y_1Y6M-SALK3.
+            ELSE.
+               &lt;OUT&gt;-LBKUM_1Y6M = TMP_1Y6M .
+               &lt;OUT&gt;-SALK3_1Y6M = TMP_1Y6MV .
+               CONTINUE.
+            ENDIF.
+*      &quot;1Y6M-2Y
+            IF TMP_2Y &gt; WA_1Y6M_2Y-LBKUM.
+               &lt;OUT&gt;-LBKUM_2Y = WA_1Y6M_2Y-LBKUM.
+               &lt;OUT&gt;-SALK3_2Y = WA_1Y6M_2Y-SALK3.
+            ELSE.
+               &lt;OUT&gt;-LBKUM_2Y = TMP_2Y .
+               &lt;OUT&gt;-SALK3_2Y = TMP_2YV .
+               CONTINUE.
+            ENDIF.
+*      &quot;2Y-2Y6M
+            IF TMP_2Y6M &gt; WA_2Y_2Y6M-LBKUM.
+               &lt;OUT&gt;-LBKUM_2Y6M = WA_2Y_2Y6M-LBKUM.
+               &lt;OUT&gt;-SALK3_2Y6M = WA_2Y_2Y6M-SALK3.
+            ELSE.
+               &lt;OUT&gt;-LBKUM_2Y6M = TMP_2Y6M .
+               &lt;OUT&gt;-SALK3_2Y6M = TMP_2Y6MV .
+               CONTINUE.
+            ENDIF.
+      ENDIF.
+
+*&quot;360-999
+      &lt;OUT&gt;-LBKUM_999 = TMP_999 .
+      &lt;OUT&gt;-SALK3_999 = TMP_999V .
+ENDLOOP.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  POPULATE_RSPAR
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM POPULATE_RSPAR_INIT .
+
+  REFRESH IT_RSPAR.
+  DATA : T1_DATE TYPE DATUM.
+
+IF S_MATNR-LOW IS NOT INITIAL.
+  LOOP AT S_MATNR.
+    IS_RSPAR-SELNAME = &apos;MATNR&apos;.
+    IS_RSPAR-KIND = &apos;S&apos;.
+    IS_RSPAR-LOW = S_MATNR-LOW.&quot;&apos;1000&apos;.
+    IS_RSPAR-HIGH = S_MATNR-HIGH.&quot;&apos;1000&apos;.
+    IS_RSPAR-SIGN = S_MATNR-SIGN.&quot;&apos;I&apos;.
+    IS_RSPAR-OPTION = S_MATNR-OPTION.&quot;&apos;EQ&apos;.
+    append IS_RSPAR to IT_RSPAR.
+    clear : IS_RSPAR.
+  ENDLOOP.
+ELSE.
+  IS_RSPAR-SELNAME = &apos;MATNR&apos;.
+  IS_RSPAR-KIND = &apos;S&apos;.
+  IS_RSPAR-LOW = &apos;00000000000001&apos;.
+  IS_RSPAR-HIGH = &apos;99999999999999&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;BT&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+ENDIF.
+
+LOOP AT S_WERKS.
+  IS_RSPAR-SELNAME = &apos;WERKS&apos;.
+  IS_RSPAR-KIND = &apos;S&apos;.
+  IS_RSPAR-LOW = S_WERKS-LOW.&quot;&apos;1000&apos;.
+  IS_RSPAR-HIGH = S_WERKS-HIGH.&quot;&apos;1000&apos;.
+  IS_RSPAR-SIGN = S_WERKS-SIGN.&quot;&apos;I&apos;.
+  IS_RSPAR-OPTION = S_WERKS-OPTION.&quot;&apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+ENDLOOP.
+
+  &quot;GET 30 DAYS BACK
+T1_DATE = S_DATE.
+  CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+    EXPORTING
+      DATE            = T1_DATE
+      DAYS            = &apos;0&apos;
+      MONTHS          = &apos;1&apos;
+      SIGNUM          = &apos;-&apos;
+      YEARS           =&apos;0&apos;
+   IMPORTING
+     CALC_DATE       = XD
+            .
+
+  IS_RSPAR-SELNAME = &apos;DATUM&apos;.
+  IS_RSPAR-KIND = &apos;S&apos;.
+  IS_RSPAR-LOW = XD.
+  IS_RSPAR-HIGH = T1_DATE.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;BT&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;VALUATED STOCK
+  IS_RSPAR-SELNAME = &apos;BWBST&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;X&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;Storage loc./batch stock
+  IS_RSPAR-SELNAME = &apos;LGBST&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;Special stock
+  IS_RSPAR-SELNAME = &apos;SBBST&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;TOTALS ONLY - NON HIERARCHY
+  IS_RSPAR-SELNAME = &apos;PA_SUMFL&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;X&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+*  &quot;TOTALS ONLY - NON HIERARCHY LAYOUT
+  IS_RSPAR-SELNAME = &apos;PA_SFLVA&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;/MAT_AGEING&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+
+  &quot;Totals only - HIERARCHY REPRESENTATION
+  IS_RSPAR-SELNAME = &apos;XSUM&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+*  &quot;Totals only - HIERARCHY REPRESENTATION LAYOUT
+  IS_RSPAR-SELNAME = &apos;PA_SUVAR&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;Only Matls Handled in Batches
+  IS_RSPAR-SELNAME = &apos;XCHAR&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;Also batches w/o stock segment
+  IS_RSPAR-SELNAME = &apos;XNOMCHB&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;No reversal Movement
+  IS_RSPAR-SELNAME = &apos;NOSTO&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  POPULATE_RSPAR_ITEM
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM POPULATE_RSPAR_ITEM USING P_MON TYPE CHAR10.
+
+  REFRESH IT_RSPAR.
+  DATA : F_DATE TYPE DATUM,
+         T_DATE TYPE DATUM.
+
+IF S_MATNR-LOW IS NOT INITIAL.
+  LOOP AT S_MATNR.
+   IS_RSPAR-SELNAME = &apos;MATNR&apos;.
+   IS_RSPAR-KIND = &apos;S&apos;.
+   IS_RSPAR-LOW = S_MATNR-LOW.&quot;&apos;1000&apos;.
+   IS_RSPAR-HIGH = S_MATNR-HIGH.&quot;&apos;1000&apos;.
+   IS_RSPAR-SIGN = S_MATNR-SIGN.&quot;&apos;I&apos;.
+   IS_RSPAR-OPTION = S_MATNR-OPTION.&quot;&apos;EQ&apos;.
+   append IS_RSPAR to IT_RSPAR.
+   clear : IS_RSPAR.
+  ENDLOOP.
+ELSE.
+  IS_RSPAR-SELNAME = &apos;MATNR&apos;.
+  IS_RSPAR-KIND = &apos;S&apos;.
+  IS_RSPAR-LOW = &apos;00000000000001&apos;.
+  IS_RSPAR-HIGH = &apos;99999999999999&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;BT&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+ENDIF.
+  LOOP AT S_WERKS.
+    IS_RSPAR-SELNAME = &apos;WERKS&apos;.
+    IS_RSPAR-KIND = &apos;S&apos;.
+    IS_RSPAR-LOW = S_WERKS-LOW.&quot;&apos;1000&apos;.
+    IS_RSPAR-HIGH = S_WERKS-HIGH.&quot;&apos;1000&apos;.
+    IS_RSPAR-SIGN = S_WERKS-SIGN.&quot;&apos;I&apos;.
+    IS_RSPAR-OPTION = S_WERKS-OPTION.&quot;&apos;EQ&apos;.
+    append IS_RSPAR to IT_RSPAR.
+    clear : IS_RSPAR.
+  ENDLOOP.
+
+  CASE P_MON.
+    WHEN &apos;31_60&apos;.
+      F_DATE = XD - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;1&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD1 = T_DATE.
+    WHEN &apos;61_90&apos;.
+      F_DATE = XD1 - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;1&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD2 = T_DATE.
+    WHEN &apos;91_180&apos;.
+     F_DATE = XD2 - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;3&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD3 = T_DATE.
+    WHEN &apos;181_366&apos;.
+     F_DATE = XD3 - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;6&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD4 = T_DATE.
+    WHEN &apos;1Y_1Y6M&apos;.   &quot;IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&amp;Y AUDITING FOR PRO
+     F_DATE = XD4 - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;6&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD5 = T_DATE.
+    WHEN &apos;1Y6M_2Y&apos;.    &quot;IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&amp;Y AUDITING FOR PRO
+     F_DATE = XD5 - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;6&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD6 = T_DATE.
+    WHEN &apos;2Y_2Y6M&apos;.    &quot;IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&amp;Y AUDITING FOR PRO
+     F_DATE = XD6 - 1.
+     &quot;GET DAYS BACK
+      CALL FUNCTION &apos;RP_CALC_DATE_IN_INTERVAL&apos;
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = &apos;0&apos;
+          MONTHS          = &apos;6&apos;
+          SIGNUM          = &apos;-&apos;
+          YEARS           =&apos;0&apos;
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD7 = T_DATE.
+    WHEN OTHERS.
+      MESSAGE &apos;ERROR IN PERIOD CHECK YOUR ABAP CODE&apos; TYPE &apos;E&apos;.
+  ENDCASE.
+
+
+
+  IS_RSPAR-SELNAME = &apos;DATUM&apos;.
+  IS_RSPAR-KIND = &apos;S&apos;.
+  IS_RSPAR-LOW = T_DATE.&quot;&apos;1000&apos;.
+  IS_RSPAR-HIGH = F_DATE.&quot;&apos;1000&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;BT&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;VALUATED STOCK
+  IS_RSPAR-SELNAME = &apos;BWBST&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;X&apos;.
+*  IS_RSPAR-HIGH = S_DATE-HIGH.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  &quot;TOTALS ONLY - NON HIERARCHY
+  IS_RSPAR-SELNAME = &apos;PA_SUMFL&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;X&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+*  &quot;TOTALS ONLY - NON HIERARCHY LAYOUT
+  IS_RSPAR-SELNAME = &apos;PA_SFLVA&apos;.
+  IS_RSPAR-KIND = &apos;P&apos;.
+  IS_RSPAR-LOW = &apos;/MAT_AGEING&apos;.
+  IS_RSPAR-SIGN = &apos;I&apos;.
+  IS_RSPAR-OPTION = &apos;EQ&apos;.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  31_60
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 31_60 .
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;31_60&apos;.
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_3060-MATNR DUMMY WA_TMP_3060-WERKS DUMMY
+                                 WA_TMP_3060-LBKUM DUMMY WA_TMP_3060-SALK3 DUMMY.
+
+      UNPACK WA_TMP_3060-MATNR TO WA_TMP_3060-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_3060-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_3060-SALK3 WITH &apos;&apos;.
+      WA_3060-MATNR = WA_TMP_3060-MATNR.
+      WA_3060-WERKS = WA_TMP_3060-WERKS.
+      WA_3060-LBKUM = WA_TMP_3060-LBKUM.
+      WA_3060-SALK3 = WA_TMP_3060-SALK3.
+
+      APPEND WA_3060 TO IT_3060.
+      CLEAR: WA_3060, WA_TMP_3060.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  61_90
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 61_90 .
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;61_90&apos; .
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_6190-MATNR DUMMY WA_TMP_6190-WERKS DUMMY
+                                 WA_TMP_6190-LBKUM DUMMY WA_TMP_6190-SALK3 DUMMY.
+
+      UNPACK WA_TMP_6190-MATNR TO WA_TMP_6190-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_6190-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_6190-SALK3 WITH &apos;&apos;.
+      WA_6190-MATNR = WA_TMP_6190-MATNR.
+      WA_6190-WERKS = WA_TMP_6190-WERKS.
+      WA_6190-LBKUM = WA_TMP_6190-LBKUM.
+      WA_6190-SALK3 = WA_TMP_6190-SALK3.
+
+      APPEND WA_6190 TO IT_6190.
+      CLEAR: WA_6190, WA_TMP_6190.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  91_180
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 91_180 .
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;91_180&apos; .
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_91180-MATNR DUMMY WA_TMP_91180-WERKS DUMMY
+                                 WA_TMP_91180-LBKUM DUMMY WA_TMP_91180-SALK3 DUMMY.
+
+      UNPACK WA_TMP_91180-MATNR TO WA_TMP_91180-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_91180-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_91180-SALK3 WITH &apos;&apos;.
+      WA_91180-MATNR = WA_TMP_91180-MATNR.
+      WA_91180-WERKS = WA_TMP_91180-WERKS.
+      WA_91180-LBKUM = WA_TMP_91180-LBKUM.
+      WA_91180-SALK3 = WA_TMP_91180-SALK3.
+
+      APPEND WA_91180 TO IT_91180.
+      CLEAR: WA_91180, WA_TMP_91180.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  181_360
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 181_360 .
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;181_366&apos; .
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_181360-MATNR DUMMY WA_TMP_181360-WERKS DUMMY
+                                 WA_TMP_181360-LBKUM DUMMY WA_TMP_181360-SALK3 DUMMY.
+
+      UNPACK WA_TMP_181360-MATNR TO WA_TMP_181360-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_181360-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_181360-SALK3 WITH &apos;&apos;.
+      WA_181360-MATNR = WA_TMP_181360-MATNR.
+      WA_181360-WERKS = WA_TMP_181360-WERKS.
+      WA_181360-LBKUM = WA_TMP_181360-LBKUM.
+      WA_181360-SALK3 = WA_TMP_181360-SALK3.
+
+      APPEND WA_181360 TO IT_181360.
+      CLEAR: WA_181360, WA_TMP_181360.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  1Y_1Y6M
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 1Y_1Y6M .
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;1Y_1Y6M&apos; .
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_1Y_1Y6M-MATNR DUMMY WA_TMP_1Y_1Y6M-WERKS DUMMY
+                                 WA_TMP_1Y_1Y6M-LBKUM DUMMY WA_TMP_1Y_1Y6M-SALK3 DUMMY.
+
+      UNPACK WA_TMP_1Y_1Y6M-MATNR TO WA_TMP_1Y_1Y6M-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_1Y_1Y6M-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_1Y_1Y6M-SALK3 WITH &apos;&apos;.
+      WA_1Y_1Y6M-MATNR = WA_TMP_1Y_1Y6M-MATNR.
+      WA_1Y_1Y6M-WERKS = WA_TMP_1Y_1Y6M-WERKS.
+      WA_1Y_1Y6M-LBKUM = WA_TMP_1Y_1Y6M-LBKUM.
+      WA_1Y_1Y6M-SALK3 = WA_TMP_1Y_1Y6M-SALK3.
+
+      APPEND WA_1Y_1Y6M TO IT_1Y_1Y6M.
+      CLEAR: WA_1Y_1Y6M, WA_TMP_1Y_1Y6M.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  1Y6M_2Y
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 1Y6M_2Y.
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;1Y6M_2Y&apos; .
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_1Y6M_2Y-MATNR DUMMY WA_TMP_1Y6M_2Y-WERKS DUMMY
+                                 WA_TMP_1Y6M_2Y-LBKUM DUMMY WA_TMP_1Y6M_2Y-SALK3 DUMMY.
+
+      UNPACK WA_TMP_1Y6M_2Y-MATNR TO WA_TMP_1Y6M_2Y-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_1Y6M_2Y-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_1Y6M_2Y-SALK3 WITH &apos;&apos;.
+      WA_1Y6M_2Y-MATNR = WA_TMP_1Y6M_2Y-MATNR.
+      WA_1Y6M_2Y-WERKS = WA_TMP_1Y6M_2Y-WERKS.
+      WA_1Y6M_2Y-LBKUM = WA_TMP_1Y6M_2Y-LBKUM.
+      WA_1Y6M_2Y-SALK3 = WA_TMP_1Y6M_2Y-SALK3.
+
+      APPEND WA_1Y6M_2Y TO IT_1Y6M_2Y.
+      CLEAR: WA_1Y6M_2Y, WA_TMP_1Y6M_2Y.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  2Y_2Y6M
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM 2Y_2Y6M.
+
+  PERFORM POPULATE_RSPAR_ITEM USING &apos;2Y_2Y6M&apos; .
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_TMP_2Y_2Y6M-MATNR DUMMY WA_TMP_2Y_2Y6M-WERKS DUMMY
+                                 WA_TMP_2Y_2Y6M-LBKUM DUMMY WA_TMP_2Y_2Y6M-SALK3 DUMMY.
+
+      UNPACK WA_TMP_2Y_2Y6M-MATNR TO WA_TMP_2Y_2Y6M-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_2Y_2Y6M-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP_2Y_2Y6M-SALK3 WITH &apos;&apos;.
+      WA_2Y_2Y6M-MATNR = WA_TMP_2Y_2Y6M-MATNR.
+      WA_2Y_2Y6M-WERKS = WA_TMP_2Y_2Y6M-WERKS.
+      WA_2Y_2Y6M-LBKUM = WA_TMP_2Y_2Y6M-LBKUM.
+      WA_2Y_2Y6M-SALK3 = WA_TMP_2Y_2Y6M-SALK3.
+
+      APPEND WA_2Y_2Y6M TO IT_2Y_2Y6M.
+      CLEAR: WA_2Y_2Y6M, WA_TMP_2Y_2Y6M.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  GET_INITIAL_DATA
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  --&gt;  p1        text
+*  &lt;--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_INITIAL_DATA .
+
+  &quot;GET MATERIAL TYE DATA
+   SELECT MATNR,
+          MARA~MTART,
+          T134T~MTBEZ,
+          MARA~WRKST
+     FROM MARA INNER JOIN T134T ON MARA~MTART = T134T~MTART AND
+                                  T134T~SPRAS = @SY-LANGU
+     INTO TABLE @DATA(IT_MTART)
+     WHERE MATNR IN @S_MATNR AND
+           MARA~MTART IN @S_MTART.
+
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION &apos;LIST_FROM_MEMORY&apos;
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION &apos;LIST_TO_ASCI&apos;
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS &apos;------&apos; OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT &apos;|&apos; INTO DUMMY WA_OUT-MATNR WA_OUT-MAKTX WA_OUT-WERKS WA_TMP-LBKUM
+                                 WA_TMP-LBKUM_30 WA_TMP-SALK3 WA_TMP-SALK3_30 DUMMY.
+
+      UNPACK WA_OUT-MATNR TO WA_OUT-MATNR.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP-LBKUM WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP-LBKUM_30 WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP-SALK3 WITH &apos;&apos;.
+      REPLACE ALL OCCURRENCES OF &apos;,&apos; IN WA_TMP-SALK3_30 WITH &apos;&apos;.
+      WA_OUT-LBKUM = WA_TMP-LBKUM.
+      WA_OUT-LBKUM_30 = WA_TMP-LBKUM_30.
+      WA_OUT-SALK3 = WA_TMP-SALK3.
+      WA_OUT-SALK3_30 = WA_TMP-SALK3_30.
+
+      &quot;VALIDATE ON TOTAL RECEIPTS VS TOTAL ISSUE
+      IF WA_OUT-LBKUM_30 &gt; WA_OUT-LBKUM.
+         WA_OUT-LBKUM_30 = WA_OUT-LBKUM.
+         WA_OUT-SALK3_30 = WA_OUT-SALK3.
+      ENDIF.
+
+      DATA WA_MTART LIKE LINE OF IT_MTART.
+      READ TABLE IT_MTART INTO WA_MTART WITH KEY MATNR = WA_OUT-MATNR.
+      IF SY-SUBRC = 0.
+        WA_OUT-MTART = WA_MTART-MTART.
+        WA_OUT-MTBEZ = WA_MTART-MTBEZ.
+        WA_OUT-WRKST = WA_MTART-WRKST.
+        CLEAR WA_MTART.
+      ENDIF.
+
+      APPEND WA_OUT TO IT_OUT.
+      CLEAR: WA_OUT, WA_TMP.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.</source>
+ </PROG>
+ <PROG NAME="ZMM_MAGE" VARCL="X" SUBC="1" CNAM="IBR.AHMED" CDAT="20160726" UNAM="IBR.AHMED" UDAT="20180624" VERN="000114" RMAND="100" RLOAD="E" FIXPT="X" SDATE="20180624" STIME="175446" IDATE="20180624" ITIME="172059" UCCHECK="X">
+  <textPool>
+   <language SPRAS="E">
+    <textElement ID="I" KEY="100" ENTRY="Selection" LENGTH="19 "/>
+    <textElement ID="R" ENTRY="Material Ageing" LENGTH="15 "/>
+    <textElement ID="S" KEY="P_EXTEND" ENTRY="        Extend to more than one year" LENGTH="36 "/>
+    <textElement ID="S" KEY="S_DATE" ENTRY="        Date" LENGTH="20 "/>
+    <textElement ID="S" KEY="S_MATNR" ENTRY="D       ." LENGTH="16 "/>
+    <textElement ID="S" KEY="S_MTART" ENTRY="D       ." LENGTH="9 "/>
+    <textElement ID="S" KEY="S_WERKS" ENTRY="D       ." LENGTH="13 "/>
+    <textElement ID="S" KEY="S_WRKST" ENTRY="D       ." LENGTH="9 "/>
+   </language>
+  </textPool>
+  <pfstatus>
+   <pfstatus_sta CODE="ZSALV_STANDARD1" MODAL="D" ACTCODE="000001" PFKCODE="000001" BUTCODE="0001" INT_NOTE="Standard for General List Output in Fullscreen Grid"/>
+   <pfstatus_fun CODE="%ML" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Session" PATH="S"/>
+   <pfstatus_fun CODE="%PC" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_EXPORT" ICON_ID="@49@" FUN_TEXT="Local File..." PATH="L"/>
+   <pfstatus_fun CODE="%SC" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SEARCH" ICON_ID="@13@" FUN_TEXT="Search" PATH="E"/>
+   <pfstatus_fun CODE="%SC+" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SEARCH_NEXT" ICON_ID="@4E@" FUN_TEXT="Find Next"/>
+   <pfstatus_fun CODE="%SL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_MAIL" ICON_ID="@1S@" FUN_TEXT="Mail Recipient" PATH="M"/>
+   <pfstatus_fun CODE="&amp;ABC" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_ABC" ICON_ID="@DL@" FUN_TEXT="ABC Analysis" PATH="A"/>
+   <pfstatus_fun CODE="&amp;ALL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SELECT_ALL" ICON_ID="@4B@" FUN_TEXT="Select All" PATH="S"/>
+   <pfstatus_fun CODE="&amp;AQW" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_WORD_PROCESSING" ICON_ID="@DK@" FUN_TEXT="Word Processing..." PATH="W"/>
+   <pfstatus_fun CODE="&amp;AUF" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Define Totals Drilldown..." PATH="S"/>
+   <pfstatus_fun CODE="&amp;AVE" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Saving..." PATH="S"/>
+   <pfstatus_fun CODE="&amp;AVE" TEXTNO="002" TEXT_TYPE="S" TEXT_NAME="ICON_ALV_VARIANT_SAVE" ICON_ID="@DN@" FUN_TEXT="Save Layout..."/>
+   <pfstatus_fun CODE="&amp;AVR" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Mean Value" PATH="M"/>
+   <pfstatus_fun CODE="&amp;CDF" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Unfreeze Columns" PATH="U"/>
+   <pfstatus_fun CODE="&amp;CFI" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Freeze to Column" PATH="F"/>
+   <pfstatus_fun CODE="&amp;COUNT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Count" PATH="C"/>
+   <pfstatus_fun CODE="&amp;CRB" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_TOTAL_LEFT" ICON_ID="@0B@" FUN_TEXT="First Column"/>
+   <pfstatus_fun CODE="&amp;CRDESIG" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Crystal Reports Designer" PATH="C"/>
+   <pfstatus_fun CODE="&amp;CRE" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_TOTAL_RIGHT" ICON_ID="@0C@" FUN_TEXT="Last Column"/>
+   <pfstatus_fun CODE="&amp;CRL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_COLUMN_LEFT" ICON_ID="@0D@" FUN_TEXT="Column Left"/>
+   <pfstatus_fun CODE="&amp;CRR" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_COLUMN_RIGHT" ICON_ID="@0E@" FUN_TEXT="Column Right"/>
+   <pfstatus_fun CODE="&amp;EB9" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_TABLE_SETTINGS" ICON_ID="@36@" FUN_TEXT="Call Up Report..." PATH="B"/>
+   <pfstatus_fun CODE="&amp;ELP" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SYSTEM_HELP" ICON_ID="@35@" FUN_TEXT="Help"/>
+   <pfstatus_fun CODE="&amp;ERW" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Administration..." PATH="A"/>
+   <pfstatus_fun CODE="&amp;ETA" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SELECT_DETAIL" ICON_ID="@16@" FUN_TEXT="Details"/>
+   <pfstatus_fun CODE="&amp;F03" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Back" PATH="B"/>
+   <pfstatus_fun CODE="&amp;F12" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_CANCEL" ICON_ID="@0W@" FUN_TEXT="Cancel" PATH="A"/>
+   <pfstatus_fun CODE="&amp;F15" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Exit" PATH="X"/>
+   <pfstatus_fun CODE="&amp;F4" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Possible Entries"/>
+   <pfstatus_fun CODE="&amp;GRAPH" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_GRAPHICS" ICON_ID="@0N@" FUN_TEXT="Graphic" PATH="G"/>
+   <pfstatus_fun CODE="&amp;IC1" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SELECT_DETAIL" ICON_ID="@16@" FUN_TEXT="Choose"/>
+   <pfstatus_fun CODE="&amp;ILD" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Delete Filter" PATH="L"/>
+   <pfstatus_fun CODE="&amp;ILT" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_FILTER" ICON_ID="@4G@" FUN_TEXT="Set Filter" PATH="F"/>
+   <pfstatus_fun CODE="&amp;INFO" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_INFORMATION" ICON_ID="@0S@" FUN_TEXT="Information"/>
+   <pfstatus_fun CODE="&amp;MAX" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Maximum" PATH="A"/>
+   <pfstatus_fun CODE="&amp;MIN" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Minimum" PATH="I"/>
+   <pfstatus_fun CODE="&amp;OAD" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Choose..." PATH="H"/>
+   <pfstatus_fun CODE="&amp;OAD" TEXTNO="002" TEXT_TYPE="S" TEXT_NAME="ICON_ALV_VARIANT_CHOOSE" ICON_ID="@DM@" FUN_TEXT="Select Layout"/>
+   <pfstatus_fun CODE="&amp;ODN" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SORT_DOWN" ICON_ID="@3F@" FUN_TEXT="Sort in Descending Order" PATH="O"/>
+   <pfstatus_fun CODE="&amp;OL0" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_ALV_VARIANTS" ICON_ID="@LZ@" FUN_TEXT="Change Layout..."/>
+   <pfstatus_fun CODE="&amp;OLX" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_VARIANTS" ICON_ID="@0R@" FUN_TEXT="Change..." PATH="C"/>
+   <pfstatus_fun CODE="&amp;OPT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Optimize Width" PATH="P"/>
+   <pfstatus_fun CODE="&amp;OUP" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SORT_UP" ICON_ID="@3E@" FUN_TEXT="Sort in Ascending Order" PATH="I"/>
+   <pfstatus_fun CODE="&amp;RNT" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_PRINT" ICON_ID="@0X@" FUN_TEXT="Print" PATH="P"/>
+   <pfstatus_fun CODE="&amp;RNT_PREV" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_LAYOUT_CONTROL" ICON_ID="@3G@" FUN_TEXT="Print Preview" PATH="R"/>
+   <pfstatus_fun CODE="&amp;SAL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_DESELECT_ALL" ICON_ID="@4D@" FUN_TEXT="Deselect All" PATH="D"/>
+   <pfstatus_fun CODE="&amp;SUM" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_INTERMEDIATE_SUM" ICON_ID="@5V@" FUN_TEXT="Subtotals" PATH="U"/>
+   <pfstatus_fun CODE="&amp;UMC" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SUM" ICON_ID="@3Z@" FUN_TEXT="Total" PATH="T"/>
+   <pfstatus_fun CODE="&amp;VCRYSTAL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_REPORT_TEMPLATE" ICON_ID="@QH@" FUN_TEXT="Crystal Reports" PATH="C"/>
+   <pfstatus_fun CODE="&amp;VCRYSTRAL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_REPORT_TEMPLATE" ICON_ID="@QH@" FUN_TEXT="Crystal Reports Designer"/>
+   <pfstatus_fun CODE="&amp;VEXCEL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_XLS" ICON_ID="@J2@" FUN_TEXT="Microsoft Excel" PATH="M"/>
+   <pfstatus_fun CODE="&amp;VGRID" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_LIST" ICON_ID="@3W@" FUN_TEXT="SAP List Viewer" PATH="S"/>
+   <pfstatus_fun CODE="&amp;VLOTUS" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_LOTUS" ICON_ID="@JD@" FUN_TEXT="Lotus 1-2-3" PATH="L"/>
+   <pfstatus_fun CODE="&amp;XXL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_XXL" ICON_ID="@DJ@" FUN_TEXT="Spreadsheet..." PATH="A"/>
+   <pfstatus_fun CODE="CURRENT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Current Layout"/>
+   <pfstatus_fun CODE="DEFAULT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Default Layout"/>
+   <pfstatus_fun CODE="F4" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="F4 Layouts"/>
+   <pfstatus_fun CODE="SET_CELL" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Current Cell"/>
+   <pfstatus_men CODE="000001" NO="01" REF_TYPE="F" REF_CODE="&amp;RNT_PREV" REF_NO="001"/>
+   <pfstatus_men CODE="000001" NO="02" REF_TYPE="F" REF_CODE="&amp;RNT" REF_NO="001"/>
+   <pfstatus_men CODE="000001" NO="03" REF_TYPE="S"/>
+   <pfstatus_men CODE="000001" NO="04" REF_TYPE="M" REF_CODE="000002"/>
+   <pfstatus_men CODE="000001" NO="05" REF_TYPE="M" REF_CODE="000003"/>
+   <pfstatus_men CODE="000001" NO="06" REF_TYPE="S"/>
+   <pfstatus_men CODE="000001" NO="07" REF_TYPE="F" REF_CODE="&amp;F15" REF_NO="001"/>
+   <pfstatus_men CODE="000002" NO="01" REF_TYPE="F" REF_CODE="&amp;AQW" REF_NO="001"/>
+   <pfstatus_men CODE="000002" NO="02" REF_TYPE="F" REF_CODE="&amp;XXL" REF_NO="001"/>
+   <pfstatus_men CODE="000002" NO="03" REF_TYPE="F" REF_CODE="%PC" REF_NO="001"/>
+   <pfstatus_men CODE="000003" NO="01" REF_TYPE="F" REF_CODE="%SL" REF_NO="001"/>
+   <pfstatus_men CODE="000003" NO="02" REF_TYPE="F" REF_CODE="%ML" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="01" REF_TYPE="F" REF_CODE="&amp;ALL" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="02" REF_TYPE="F" REF_CODE="&amp;SAL" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="03" REF_TYPE="S"/>
+   <pfstatus_men CODE="000004" NO="04" REF_TYPE="F" REF_CODE="&amp;ILT" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="05" REF_TYPE="F" REF_CODE="&amp;ILD" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="06" REF_TYPE="S"/>
+   <pfstatus_men CODE="000004" NO="07" REF_TYPE="F" REF_CODE="&amp;OUP" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="08" REF_TYPE="F" REF_CODE="&amp;ODN" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="09" REF_TYPE="S"/>
+   <pfstatus_men CODE="000004" NO="10" REF_TYPE="M" REF_CODE="000005"/>
+   <pfstatus_men CODE="000004" NO="11" REF_TYPE="F" REF_CODE="&amp;SUM" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="12" REF_TYPE="S"/>
+   <pfstatus_men CODE="000004" NO="13" REF_TYPE="F" REF_CODE="%SC" REF_NO="001"/>
+   <pfstatus_men CODE="000004" NO="14" REF_TYPE="S"/>
+   <pfstatus_men CODE="000004" NO="15" REF_TYPE="F" REF_CODE="&amp;F12" REF_NO="001"/>
+   <pfstatus_men CODE="000005" NO="01" REF_TYPE="F" REF_CODE="&amp;UMC" REF_NO="001"/>
+   <pfstatus_men CODE="000005" NO="02" REF_TYPE="F" REF_CODE="&amp;AVR" REF_NO="001"/>
+   <pfstatus_men CODE="000005" NO="03" REF_TYPE="F" REF_CODE="&amp;MIN" REF_NO="001"/>
+   <pfstatus_men CODE="000005" NO="04" REF_TYPE="F" REF_CODE="&amp;MAX" REF_NO="001"/>
+   <pfstatus_men CODE="000005" NO="05" REF_TYPE="F" REF_CODE="&amp;COUNT" REF_NO="001"/>
+   <pfstatus_men CODE="000006" NO="01" REF_TYPE="F" REF_CODE="&amp;F03" REF_NO="001"/>
+   <pfstatus_men CODE="000007" NO="01" REF_TYPE="M" REF_CODE="000008"/>
+   <pfstatus_men CODE="000007" NO="02" REF_TYPE="M" REF_CODE="000009"/>
+   <pfstatus_men CODE="000007" NO="03" REF_TYPE="F" REF_CODE="&amp;AUF" REF_NO="001"/>
+   <pfstatus_men CODE="000008" NO="01" REF_TYPE="F" REF_CODE="&amp;OLX" REF_NO="001"/>
+   <pfstatus_men CODE="000008" NO="02" REF_TYPE="F" REF_CODE="&amp;OAD" REF_NO="001"/>
+   <pfstatus_men CODE="000008" NO="03" REF_TYPE="S"/>
+   <pfstatus_men CODE="000008" NO="04" REF_TYPE="F" REF_CODE="&amp;AVE" REF_NO="001"/>
+   <pfstatus_men CODE="000008" NO="05" REF_TYPE="S"/>
+   <pfstatus_men CODE="000008" NO="06" REF_TYPE="F" REF_CODE="&amp;ERW" REF_NO="001"/>
+   <pfstatus_men CODE="000009" NO="01" REF_TYPE="F" REF_CODE="&amp;OPT" REF_NO="001"/>
+   <pfstatus_men CODE="000009" NO="02" REF_TYPE="S"/>
+   <pfstatus_men CODE="000009" NO="03" REF_TYPE="F" REF_CODE="&amp;CFI" REF_NO="001"/>
+   <pfstatus_men CODE="000009" NO="04" REF_TYPE="F" REF_CODE="&amp;CDF" REF_NO="001"/>
+   <pfstatus_mtx CODE="000001" TEXT_TYPE="S" TEXT="List" PATH="L" INT_NOTE="SALV_TABLE_STATUS List"/>
+   <pfstatus_mtx CODE="000002" TEXT_TYPE="S" TEXT="Export" PATH="E" INT_NOTE="STANDARD Save"/>
+   <pfstatus_mtx CODE="000003" TEXT_TYPE="S" TEXT="Send To" PATH="S"/>
+   <pfstatus_mtx CODE="000004" TEXT_TYPE="S" TEXT="Edit" PATH="E" INT_NOTE="STANDARD"/>
+   <pfstatus_mtx CODE="000005" TEXT_TYPE="S" TEXT="Calculate" PATH="C"/>
+   <pfstatus_mtx CODE="000006" TEXT_TYPE="S" TEXT="Goto" PATH="G" INT_NOTE="Standard Supplement"/>
+   <pfstatus_mtx CODE="000007" TEXT_TYPE="S" TEXT="Settings" PATH="S" INT_NOTE="SALV_TABLE_STATUS"/>
+   <pfstatus_mtx CODE="000008" TEXT_TYPE="S" TEXT="Layout" PATH="A" INT_NOTE="Sub STANDARD"/>
+   <pfstatus_mtx CODE="000009" TEXT_TYPE="S" TEXT="Columns" PATH="C"/>
+   <pfstatus_act CODE="000001" NO="01" MENUCODE="000001"/>
+   <pfstatus_act CODE="000001" NO="02" MENUCODE="000004"/>
+   <pfstatus_act CODE="000001" NO="03" MENUCODE="000006"/>
+   <pfstatus_act CODE="000001" NO="04" MENUCODE="000007"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="01" PFNO="39"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="02" PFNO="S"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="03" PFNO="05"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="04" PFNO="06"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="05" PFNO="S"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="06" PFNO="28"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="07" PFNO="40"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="08" PFNO="29"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="09" PFNO="S"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="10" PFNO="30"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="11" PFNO="42"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="12" PFNO="S"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="13" PFNO="46"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="14" PFNO="S"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="15" PFNO="32"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="16" PFNO="33"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="17" PFNO="34"/>
+   <pfstatus_pfk CODE="000001" PFNO="01" FUNCODE="&amp;ELP" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="02" FUNCODE="&amp;IC1" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="03" FUNCODE="&amp;F03" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="04" FUNCODE="&amp;F4" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="05" FUNCODE="&amp;ALL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="06" FUNCODE="&amp;SAL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="07" FUNCODE="SET_CELL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="12" FUNCODE="&amp;F12" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="14" FUNCODE="CURRENT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="15" FUNCODE="&amp;F15" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="16" FUNCODE="DEFAULT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="17" FUNCODE="F4" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="18" FUNCODE="&amp;CRB" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="19" FUNCODE="&amp;CRE" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="21" FUNCODE="&amp;XXL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="23" FUNCODE="&amp;VCRYSTRAL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="24" FUNCODE="&amp;VCRYSTAL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="25" FUNCODE="&amp;ABC" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="26" FUNCODE="&amp;CRL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="27" FUNCODE="&amp;CRR" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="28" FUNCODE="&amp;OUP" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="29" FUNCODE="&amp;ILT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="30" FUNCODE="&amp;UMC" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="31" FUNCODE="%SL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="32" FUNCODE="&amp;OL0" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="33" FUNCODE="&amp;OAD" FUNNO="002"/>
+   <pfstatus_pfk CODE="000001" PFNO="34" FUNCODE="&amp;AVE" FUNNO="002"/>
+   <pfstatus_pfk CODE="000001" PFNO="36" FUNCODE="&amp;INFO" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="37" FUNCODE="&amp;EB9" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="38" FUNCODE="&amp;VLOTUS" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="39" FUNCODE="&amp;ETA" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="40" FUNCODE="&amp;ODN" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="41" FUNCODE="&amp;VGRID" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="42" FUNCODE="&amp;SUM" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="43" FUNCODE="&amp;VEXCEL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="44" FUNCODE="&amp;AQW" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="45" FUNCODE="%PC" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="46" FUNCODE="&amp;RNT_PREV" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="47" FUNCODE="&amp;GRAPH" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="48" FUNCODE="&amp;CRDESIG" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="71" FUNCODE="%SC" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="84" FUNCODE="%SC+" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="86" FUNCODE="&amp;RNT" FUNNO="001"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="%CH"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="%ML"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="%PC"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="%SC"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="%SC+"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="%SL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ABC"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ALL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;AQW"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;AUF"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;AVE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;AVR"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;BS"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;BS+"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;BS-"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CDF"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CFI"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;COUNT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRB"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRBATCH"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRDESIG"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRR"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRTEMPL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;CRYSTAL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;DATA_SAVE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;DAU"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;DOF"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;DON"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;EB3"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;EB9"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ELP"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ERW"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ETA"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;F03"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;F12"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;F15"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;F4"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;GRAPH"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;IC1"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ILD"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ILT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;INFO"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;KOM"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;LFO"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;LIS"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;MAX"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;MIN"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;NFO"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;NTE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;OAD"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;ODN"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;OL0"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;OLX"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;OMP"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;OPT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;OUP"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;REFRESH"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;RNT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;RNT_PREV"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;SAL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;SAVE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;SUM"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;UMC"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;URL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;VCRYSTAL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;VCRYSTRAL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;VEXCEL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;VGRID"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;VLOTUS"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;XML"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;XPA"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="&amp;XXL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BAC1"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BACK"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BEB1"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BEB2"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BEB3"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BEB9"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="BEBN"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="COL0"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="COLX"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="CURRENT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="DEFAULT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="DETA"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="DRUK"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="DSAL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="ENTE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="EXIT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="EXPA"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="F4"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="FILD"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="FILT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="GET_SEL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="GLIS"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="HELP"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="INFO"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="KOMP"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="P+"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="P++"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="P-"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="P--"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PF09"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PF13"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PIC1"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PICK"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PRI"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PRIN"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="PRNT"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="RW"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SALL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SAUF"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SAVE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SCRB"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SCRE"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SCRL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SCRR"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SET_CELL"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SET_COLS"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SET_ROWS"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SKOM"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SODN"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SOUP"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="SUMC"/>
+   <pfstatus_set STATUS="ZSALV_STANDARD1" FUNCTION="ZSUM"/>
+   <pfstatus_doc OBJ_TYPE="A" OBJ_CODE="000001" MODAL="D" INT_NOTE="Standard Interface              SALV_TABLE_STANDARD"/>
+   <pfstatus_doc OBJ_TYPE="P" OBJ_CODE="000001" MODAL="D" NORM="X" INT_NOTE="Standard Maximum Interaction SALV_TABLE_STANDARD"/>
+   <pfstatus_doc OBJ_TYPE="B" OBJ_CODE="000001" SUB_CODE="0001" INT_NOTE="SALV_TABLE_STANDARD"/>
+  </pfstatus>
+  <source>REPORT ZMM_MAGE.
+TABLES: MARC,MARA.
+
+INITIALIZATION.
+INCLUDE ZMM_MAGE_TOP.
+
+AT SELECTION-SCREEN ON P_EXTEND.
+  IF P_EXTEND = &apos;X&apos;.
+    MESSAGE &apos;Reading data from report MB5B will be slower&apos; TYPE &apos;W&apos;.
+  ENDIF.
+
+
+START-OF-SELECTION.
+
+**********************************************************************
+*  GETTING 30 DAYS DATA WITH CURRENT STOCK
+**********************************************************************
+DATA DAT TYPE CHAR10.
+CONCATENATE S_DATE+6(2) S_DATE+4(2) S_DATE+0(4) INTO DAT SEPARATED BY &apos;/&apos;.
+CONCATENATE &apos;Material Ageing in&apos; DAT  INTO sy-title SEPARATED BY SPACE.
+  PERFORM POPULATE_RSPAR_INIT .
+  PERFORM GET_INITIAL_DATA.
+
+  PERFORM 31_60.
+  PERFORM 61_90.
+  PERFORM 91_180.
+  PERFORM 181_360.
+  IF P_EXTEND = &apos;X&apos;.
+    PERFORM 1Y_1Y6M.
+    PERFORM 1Y6M_2Y.
+    PERFORM 2Y_2Y6M.
+  ENDIF.
+
+  PERFORM PROCESS_DATA.
+
+  PERFORM ALV_DISPLAY.
+
+
+
+INCLUDE zmm_mage_form.</source>
+ </PROG>
+</nugget>

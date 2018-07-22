@@ -5,6 +5,7 @@ Using this report will eliminate worksheet calculations if batch is not configur
 
 ## Prequisits
 User has authorization to access T-Code:MB5B
+Valuation is on the plant level
 
 ## Steps to create the report
 1. Create the report

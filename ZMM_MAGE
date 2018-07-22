@@ -1,0 +1,40 @@
+REPORT ZMM_MAGE.
+TABLES: MARC,MARA.
+
+INITIALIZATION.
+INCLUDE ZMM_MAGE_TOP.
+
+AT SELECTION-SCREEN ON P_EXTEND.
+  IF P_EXTEND = 'X'.
+    MESSAGE 'Reading data from report MB5B will be slower' TYPE 'W'.
+  ENDIF.
+
+
+START-OF-SELECTION.
+
+**********************************************************************
+*  GETTING 30 DAYS DATA WITH CURRENT STOCK
+**********************************************************************
+DATA DAT TYPE CHAR10.
+CONCATENATE S_DATE+6(2) S_DATE+4(2) S_DATE+0(4) INTO DAT SEPARATED BY '/'.
+CONCATENATE 'Material Ageing in' DAT  INTO sy-title SEPARATED BY SPACE.
+  PERFORM POPULATE_RSPAR_INIT .
+  PERFORM GET_INITIAL_DATA.
+
+  PERFORM 31_60.
+  PERFORM 61_90.
+  PERFORM 91_180.
+  PERFORM 181_360.
+  IF P_EXTEND = 'X'.
+    PERFORM 1Y_1Y6M.
+    PERFORM 1Y6M_2Y.
+    PERFORM 2Y_2Y6M.
+  ENDIF.
+
+  PERFORM PROCESS_DATA.
+
+  PERFORM ALV_DISPLAY.
+
+
+
+INCLUDE zmm_mage_form.

@@ -1,7 +1,7 @@
 # Material Ageing ABAP Report
 
 This report is using standard report MB5B to get material ageing based on FIFO method.
-Using this report will elimate worksheet calculations if batch is not configured on SAP ERP system
+Using this report will eliminate worksheet calculations if batch is not configured on SAP ERP system
 
 ## Prequisits
 User has authorization to access T-Code:MB5B

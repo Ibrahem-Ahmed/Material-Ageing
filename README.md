@@ -4,8 +4,9 @@ This report is using standard report MB5B to get material ageing based on FIFO m
 Using this report will eliminate worksheet calculations if batch is not configured on SAP ERP system
 
 ## Prequisits
-User has authorization to access T-Code:MB5B
-Valuation is on the plant level
+* User has authorization to access T-Code:MB5B
+* Valuation is on the plant level
+* FIFO is used for Ageing
 
 ## Steps to create the report
 1. Create the report

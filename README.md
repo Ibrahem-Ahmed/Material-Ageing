@@ -7,6 +7,15 @@ Using this report will eliminate worksheet calculations if batch is not configur
 * User has authorization to access T-Code:MB5B
 * Valuation is on the plant level ( IF valuation is on company code level selection parameter need to be modified )
 * FIFO is used for Ageing
+* Create report variant for the setting "Totals Only - Non Hierarichal Representation" with name "/MAT_AGEING" with below column order
+   1. Material
+   2. Material Description
+   3. Valuation Area
+   4. Closing Stock
+   5. Total Receipt Qties
+   6. Closing Value
+   7. Total Receipt Values
+
 
 ## Steps to create the report
 1. Create the report

@@ -77,15 +77,37 @@ colorv-INT = 0.
   GR_COLUMN->SET_LONG_TEXT( '61-90 Value' ).
   GR_COLUMN->SET_COLOR( colorv ).
 
+  gr_column ?= gr_columns->get_column( 'LBKUM_120' ).
+  GR_COLUMN->SET_SHORT_TEXT( '91-120' ).
+  GR_COLUMN->SET_MEDIUM_TEXT( '91-120' ).
+  GR_COLUMN->SET_LONG_TEXT( '91-120' ).
+  GR_COLUMN->SET_COLOR( colorq ).
+  gr_column ?= gr_columns->get_column( 'SALK3_120' ).
+  GR_COLUMN->SET_SHORT_TEXT( '91-120 V' ).
+  GR_COLUMN->SET_MEDIUM_TEXT( '91-120 Value' ).
+  GR_COLUMN->SET_LONG_TEXT( '91-120 Value' ).
+  GR_COLUMN->SET_COLOR( colorv ).
+
+  gr_column ?= gr_columns->get_column( 'LBKUM_150' ).
+  GR_COLUMN->SET_SHORT_TEXT( '121-150' ).
+  GR_COLUMN->SET_MEDIUM_TEXT( '121-150' ).
+  GR_COLUMN->SET_LONG_TEXT( '121-150' ).
+  GR_COLUMN->SET_COLOR( colorq ).
+  gr_column ?= gr_columns->get_column( 'SALK3_150' ).
+  GR_COLUMN->SET_SHORT_TEXT( '121-150 V' ).
+  GR_COLUMN->SET_MEDIUM_TEXT( '121-150 Value' ).
+  GR_COLUMN->SET_LONG_TEXT( '121-150 Value' ).
+  GR_COLUMN->SET_COLOR( colorv ).
+
   gr_column ?= gr_columns->get_column( 'LBKUM_180' ).
-  GR_COLUMN->SET_SHORT_TEXT( '91-180' ).
-  GR_COLUMN->SET_MEDIUM_TEXT( '91-180' ).
-  GR_COLUMN->SET_LONG_TEXT( '91-180' ).
+  GR_COLUMN->SET_SHORT_TEXT( '151-180' ).
+  GR_COLUMN->SET_MEDIUM_TEXT( '151-180' ).
+  GR_COLUMN->SET_LONG_TEXT( '151-180' ).
   GR_COLUMN->SET_COLOR( colorq ).
   gr_column ?= gr_columns->get_column( 'SALK3_180' ).
-  GR_COLUMN->SET_SHORT_TEXT( '91-180 V' ).
-  GR_COLUMN->SET_MEDIUM_TEXT( '91-180 Value' ).
-  GR_COLUMN->SET_LONG_TEXT( '91-180 Value' ).
+  GR_COLUMN->SET_SHORT_TEXT( '151-180 V' ).
+  GR_COLUMN->SET_MEDIUM_TEXT( '151-180 Value' ).
+  GR_COLUMN->SET_LONG_TEXT( '151-180 Value' ).
   GR_COLUMN->SET_COLOR( colorv ).
 
   gr_column ?= gr_columns->get_column( 'LBKUM_360' ).
@@ -180,7 +202,7 @@ colorv-INT = 0.
  gr_layout->set_default( abap_true ).
 
 gr_functions = gr_alv->get_functions( ).
- gr_functions->set_group_filter( value = if_salv_c_bool_sap=>false ).
+ gr_functions->set_group_filter( value = if_salv_c_bool_sap=>TRUE ).
 * Set print preview
 gr_functions->set_print_preview( ).
 
@@ -208,9 +230,9 @@ FORM PROCESS_DATA .
 DESCRIBE TABLE IT_OUT LINES COUNT.
 
 LOOP AT IT_OUT ASSIGNING <OUT>.
-  CLEAR : WA_3060, WA_6190, WA_181360, WA_6190,
-          TMP_60, TMP_90, TMP_180, TMP_360, TMP_1Y6M, TMP_2Y, TMP_2Y6M, TMP_999,
-          TMP_60V, TMP_90V, TMP_180V, TMP_360V, TMP_1Y6MV,TMP_2YV,TMP_2Y6MV,TMP_999V." WA_PRIC, TMP_PRIC.
+  CLEAR : WA_0030, WA_3160, WA_6190, WA_181360, WA_6190, WA_91120, WA_121150, WA_151180,
+          TMP_60, TMP_90, TMP_120, TMP_150, TMP_180, TMP_360, TMP_1Y6M, TMP_2Y, TMP_2Y6M, TMP_999,
+          TMP_60V, TMP_90V, TMP_120V, TMP_150V, TMP_180V, TMP_360V, TMP_1Y6MV,TMP_2YV,TMP_2Y6MV,TMP_999V." WA_PRIC, TMP_PRIC.
 *****************************************************************************************
 *      SET STATUS
 *****************************************************************************************
@@ -226,9 +248,14 @@ LOOP AT IT_OUT ASSIGNING <OUT>.
       CONTINUE.
     ENDIF.
 
-    READ TABLE IT_3060    INTO WA_3060    WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
+    READ TABLE IT_0030    INTO WA_0030    WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
+    <OUT>-LBKUM_30 = WA_0030-LBKUM.
+    <OUT>-SALK3_30 = WA_0030-SALK3.
+    READ TABLE IT_3160    INTO WA_3160    WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
     READ TABLE IT_6190    INTO WA_6190    WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
-    READ TABLE IT_91180   INTO WA_91180   WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
+    READ TABLE IT_91120   INTO WA_91120   WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
+    READ TABLE IT_121150   INTO WA_121150   WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
+    READ TABLE IT_151180   INTO WA_151180   WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
     READ TABLE IT_181360  INTO WA_181360  WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
     IF P_EXTEND = 'X'.
       READ TABLE IT_1Y_1Y6M INTO WA_1Y_1Y6M  WITH KEY MATNR = <OUT>-MATNR WERKS = <OUT>-WERKS.
@@ -240,9 +267,11 @@ LOOP AT IT_OUT ASSIGNING <OUT>.
 *    READ TABLE IT_PRIC INTO WA_PRIC WITH KEY MATNR = <OUT>-MATNR BWKEY = <OUT>-WERKS.
 
     TMP_60    = <OUT>-LBKUM - <OUT>-LBKUM_30.
-    TMP_90    = TMP_60      - WA_3060-LBKUM.
-    TMP_180   = TMP_90      - WA_6190-LBKUM.
-    TMP_360   = TMP_180     - WA_91180-LBKUM.
+    TMP_90    = TMP_60      - WA_3160-LBKUM.
+    TMP_120   = TMP_90      - WA_6190-LBKUM.
+    TMP_150   = TMP_120     - WA_91120-LBKUM.
+    TMP_180   = TMP_150     - WA_121150-LBKUM.
+    TMP_360   = TMP_180     - WA_151180-LBKUM.
     TMP_999   = TMP_360     - WA_181360-LBKUM.
 
     IF P_EXTEND = 'X'.
@@ -253,10 +282,12 @@ LOOP AT IT_OUT ASSIGNING <OUT>.
     ENDIF.
 
     TMP_60V    = <OUT>-SALK3 - <OUT>-SALK3_30.
-    TMP_90V    = TMP_60V   - WA_3060-SALK3.
-    TMP_180V   = TMP_90V   - WA_6190-SALK3.
-    TMP_360V   = TMP_180V  - WA_91180-SALK3.
-    TMP_999V   = TMP_360V  - WA_181360-SALK3.
+    TMP_90V    = TMP_60V     - WA_3160-SALK3.
+    TMP_120V   = TMP_90V     - WA_6190-SALK3.
+    TMP_150V   = TMP_120V    - WA_91120-SALK3.
+    TMP_180V   = TMP_150V    - WA_121150-SALK3.
+    TMP_360V   = TMP_180V    - WA_151180-SALK3.
+    TMP_999V   = TMP_360V    - WA_181360-SALK3.
 
     IF P_EXTEND = 'X'.
       TMP_1Y6MV  = TMP_360V  - WA_181360-SALK3.
@@ -274,44 +305,64 @@ LOOP AT IT_OUT ASSIGNING <OUT>.
       <OUT>-SALK3_30 = <OUT>-SALK3.
       CONTINUE.
     ENDIF.
-*"30-60
-      IF TMP_60 > WA_3060-LBKUM.
-         <OUT>-LBKUM_60 = WA_3060-LBKUM .
-         <OUT>-SALK3_60 = WA_3060-SALK3 .
-      ELSE.
-         <OUT>-LBKUM_60 = TMP_60 .
-         <OUT>-SALK3_60 = TMP_60V .
-         CONTINUE.
-      ENDIF.
+*"31-60
+    IF TMP_60 > WA_3160-LBKUM.
+       <OUT>-LBKUM_60 = WA_3160-LBKUM .
+       <OUT>-SALK3_60 = WA_3160-SALK3 .
+    ELSE.
+       <OUT>-LBKUM_60 = TMP_60 .
+       <OUT>-SALK3_60 = TMP_60V .
+       CONTINUE.
+    ENDIF.
 
 *"61-90
-      IF TMP_90 > WA_6190-LBKUM.
-         <OUT>-LBKUM_90 = WA_6190-LBKUM .
-         <OUT>-SALK3_90 = WA_6190-SALK3 .
-      ELSE.
-         <OUT>-LBKUM_90 = TMP_90 .
-         <OUT>-SALK3_90 = TMP_90V .
-         CONTINUE.
+    IF TMP_90 > WA_6190-LBKUM.
+       <OUT>-LBKUM_90 = WA_6190-LBKUM .
+       <OUT>-SALK3_90 = WA_6190-SALK3 .
+    ELSE.
+       <OUT>-LBKUM_90 = TMP_90 .
+       <OUT>-SALK3_90 = TMP_90V .
+       CONTINUE.
     ENDIF.
-*
-*"91-180
-      IF TMP_180 > WA_91180-LBKUM.
-         <OUT>-LBKUM_180 = WA_91180-LBKUM.
-         <OUT>-SALK3_180 = WA_91180-SALK3.
-      ELSE.
-         <OUT>-LBKUM_180 = TMP_180 .
-         <OUT>-SALK3_180 = TMP_180V .
-         CONTINUE.
-      ENDIF.
+
+*"91_120
+    IF TMP_120 > WA_91120-LBKUM.
+       <OUT>-LBKUM_120 = WA_91120-LBKUM.
+       <OUT>-SALK3_120 = WA_91120-SALK3.
+    ELSE.
+       <OUT>-LBKUM_120 = TMP_120 .
+       <OUT>-SALK3_120 = TMP_120V .
+       CONTINUE.
+    ENDIF.
+
+*"121_150
+    IF TMP_150 > WA_121150-LBKUM.
+       <OUT>-LBKUM_150 = WA_121150-LBKUM.
+       <OUT>-SALK3_150 = WA_121150-SALK3.
+    ELSE.
+       <OUT>-LBKUM_150 = TMP_150 .
+       <OUT>-SALK3_150 = TMP_150V .
+       CONTINUE.
+    ENDIF.
+
+*"151-180
+    IF TMP_180 > WA_151180-LBKUM.
+       <OUT>-LBKUM_180 = WA_151180-LBKUM.
+       <OUT>-SALK3_180 = WA_151180-SALK3.
+    ELSE.
+       <OUT>-LBKUM_180 = TMP_180.
+       <OUT>-SALK3_180 = TMP_180V.
+       CONTINUE.
+    ENDIF.
 *"181-360
-      IF TMP_360 > WA_181360-LBKUM.
-         <OUT>-LBKUM_360 = WA_181360-LBKUM.
-         <OUT>-SALK3_360 = WA_181360-SALK3.
-      ELSE.
-         <OUT>-LBKUM_360 = TMP_360 .
-         <OUT>-SALK3_360 = TMP_360V .
-         CONTINUE.
-      ENDIF.
+    IF TMP_360 > WA_181360-LBKUM.
+       <OUT>-LBKUM_360 = WA_181360-LBKUM.
+       <OUT>-SALK3_360 = WA_181360-SALK3.
+    ELSE.
+       <OUT>-LBKUM_360 = TMP_360 .
+       <OUT>-SALK3_360 = TMP_360V .
+       CONTINUE.
+    ENDIF.
 
 
       IF P_EXTEND = 'X'.
@@ -359,9 +410,39 @@ ENDFORM.
 *----------------------------------------------------------------------*
 FORM POPULATE_RSPAR_INIT .
 
-  REFRESH IT_RSPAR.
-  DATA : T1_DATE TYPE DATUM.
+  REFRESH: IT_RSPAR, R_DAT.
 
+   "GET MATERIAL TYPE DATA
+  SELECT DISTINCT MARA~MATNR
+         MARA~MTART
+         T134T~MTBEZ
+         MARA~WRKST
+    FROM MARA INNER JOIN T134T ON MARA~MTART = T134T~MTART AND
+                                 T134T~SPRAS = SY-LANGU
+      INNER JOIN MARC ON MARC~MATNR = MARA~MATNR
+    INTO TABLE IT_MTART
+    WHERE MARA~MATNR IN S_MATNR AND
+          MARA~MTART IN S_MTART AND
+          MARC~WERKS IN S_WERKS.
+
+IF P_CVALUE = 'X'.
+  SELECT DISTINCT MBEWH~MATNR
+         BWKEY
+         VPRSV
+         VERPR
+         STPRS
+    FROM MBEWH INNER JOIN MARA ON MARA~MATNR = MBEWH~MATNR
+    INTO TABLE IT_MBEW
+    WHERE MBEWH~MATNR IN S_MATNR AND
+          MTART IN S_MTART AND
+          BWKEY IN S_WERKS AND
+          LFGJA = P_DATE+0(4) AND
+          LFMON = P_DATE+4(2)
+    ORDER BY MBEWH~MATNR
+             BWKEY.
+ENDIF.
+
+"IF MATERIAL FILTER IS ON
 IF S_MATNR-LOW IS NOT INITIAL.
   LOOP AT S_MATNR.
     IS_RSPAR-SELNAME = 'MATNR'.
@@ -370,6 +451,18 @@ IF S_MATNR-LOW IS NOT INITIAL.
     IS_RSPAR-HIGH = S_MATNR-HIGH."'1000'.
     IS_RSPAR-SIGN = S_MATNR-SIGN."'I'.
     IS_RSPAR-OPTION = S_MATNR-OPTION."'EQ'.
+    append IS_RSPAR to IT_RSPAR.
+    clear : IS_RSPAR.
+  ENDLOOP.
+"IF MATERIAL TYPE FILTER IS ON
+ELSEIF S_MTART-LOW IS NOT INITIAL.
+  LOOP AT IT_MTART INTO WA_MTART.
+    IS_RSPAR-SELNAME = 'MATNR'.
+    IS_RSPAR-KIND = 'S'.
+    IS_RSPAR-LOW = WA_MTART-MATNR."'1000'.
+    IS_RSPAR-HIGH = ''."'1000'.
+    IS_RSPAR-SIGN = 'I'.
+    IS_RSPAR-OPTION = 'EQ'.
     append IS_RSPAR to IT_RSPAR.
     clear : IS_RSPAR.
   ENDLOOP.
@@ -395,28 +488,15 @@ LOOP AT S_WERKS.
   clear : IS_RSPAR.
 ENDLOOP.
 
-  "GET 30 DAYS BACK
-T1_DATE = S_DATE.
-  CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
-    EXPORTING
-      DATE            = T1_DATE
-      DAYS            = '0'
-      MONTHS          = '1'
-      SIGNUM          = '-'
-      YEARS           ='0'
-   IMPORTING
-     CALC_DATE       = XD
-            .
-
   IS_RSPAR-SELNAME = 'DATUM'.
   IS_RSPAR-KIND = 'S'.
-  IS_RSPAR-LOW = XD.
-  IS_RSPAR-HIGH = T1_DATE.
+  IS_RSPAR-LOW = P_DATE.
+*  IS_RSPAR-HIGH = P_DATE.
   IS_RSPAR-SIGN = 'I'.
-  IS_RSPAR-OPTION = 'BT'.
+  IS_RSPAR-OPTION = 'EQ'.
   append IS_RSPAR to IT_RSPAR.
   clear : IS_RSPAR.
-
+*
   "VALUATED STOCK
   IS_RSPAR-SELNAME = 'BWBST'.
   IS_RSPAR-KIND = 'P'.
@@ -425,7 +505,7 @@ T1_DATE = S_DATE.
   IS_RSPAR-OPTION = 'EQ'.
   append IS_RSPAR to IT_RSPAR.
   clear : IS_RSPAR.
-
+*
   "Storage loc./batch stock
   IS_RSPAR-SELNAME = 'LGBST'.
   IS_RSPAR-KIND = 'P'.
@@ -507,6 +587,63 @@ T1_DATE = S_DATE.
   IS_RSPAR-OPTION = 'EQ'.
   append IS_RSPAR to IT_RSPAR.
   clear : IS_RSPAR.
+
+*******Scope of List
+  IS_RSPAR-SELNAME = 'PA_WDZER'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  IS_RSPAR-SELNAME = 'PA_WDZEW'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  IS_RSPAR-SELNAME = 'PA_WDWIZ'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  IS_RSPAR-SELNAME = 'PA_WDWUW'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  IS_RSPAR-SELNAME = 'PA_WDWEW'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  IS_RSPAR-SELNAME = 'PA_NDZER'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  IS_RSPAR-SELNAME = 'PA_NDSTO'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 ENDFORM.
 *&---------------------------------------------------------------------*
 *&      Form  POPULATE_RSPAR_ITEM
@@ -516,22 +653,34 @@ ENDFORM.
 *  -->  p1        text
 *  <--  p2        text
 *----------------------------------------------------------------------*
-FORM POPULATE_RSPAR_ITEM USING P_MON TYPE CHAR10.
+FORM POPULATE_RSPAR_ITEM USING P_MON TYPE CHAR20.
 
-  REFRESH IT_RSPAR.
+  REFRESH: IT_RSPAR, R_DAT.
   DATA : F_DATE TYPE DATUM,
          T_DATE TYPE DATUM.
-
+"IF MATERIAL FILTER IS ON
 IF S_MATNR-LOW IS NOT INITIAL.
   LOOP AT S_MATNR.
-   IS_RSPAR-SELNAME = 'MATNR'.
-   IS_RSPAR-KIND = 'S'.
-   IS_RSPAR-LOW = S_MATNR-LOW."'1000'.
-   IS_RSPAR-HIGH = S_MATNR-HIGH."'1000'.
-   IS_RSPAR-SIGN = S_MATNR-SIGN."'I'.
-   IS_RSPAR-OPTION = S_MATNR-OPTION."'EQ'.
-   append IS_RSPAR to IT_RSPAR.
-   clear : IS_RSPAR.
+    IS_RSPAR-SELNAME = 'MATNR'.
+    IS_RSPAR-KIND = 'S'.
+    IS_RSPAR-LOW = S_MATNR-LOW."'1000'.
+    IS_RSPAR-HIGH = S_MATNR-HIGH."'1000'.
+    IS_RSPAR-SIGN = S_MATNR-SIGN."'I'.
+    IS_RSPAR-OPTION = S_MATNR-OPTION."'EQ'.
+    append IS_RSPAR to IT_RSPAR.
+    clear : IS_RSPAR.
+  ENDLOOP.
+"IF MATERIAL TYPE FILTER IS ON
+ELSEIF S_MTART-LOW IS NOT INITIAL.
+  LOOP AT IT_MTART INTO WA_MTART.
+    IS_RSPAR-SELNAME = 'MATNR'.
+    IS_RSPAR-KIND = 'S'.
+    IS_RSPAR-LOW = WA_MTART-MATNR."'1000'.
+    IS_RSPAR-HIGH = ''."'1000'.
+    IS_RSPAR-SIGN = 'I'.
+    IS_RSPAR-OPTION = 'EQ'.
+    append IS_RSPAR to IT_RSPAR.
+    clear : IS_RSPAR.
   ENDLOOP.
 ELSE.
   IS_RSPAR-SELNAME = 'MATNR'.
@@ -543,6 +692,8 @@ ELSE.
   append IS_RSPAR to IT_RSPAR.
   clear : IS_RSPAR.
 ENDIF.
+
+
   LOOP AT S_WERKS.
     IS_RSPAR-SELNAME = 'WERKS'.
     IS_RSPAR-KIND = 'S'.
@@ -554,7 +705,22 @@ ENDIF.
     clear : IS_RSPAR.
   ENDLOOP.
 
+
   CASE P_MON.
+    WHEN '00_30'.
+    "GET 30 DAYS BACK
+  F_DATE = P_DATE.
+    CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
+      EXPORTING
+        DATE            = F_DATE
+        DAYS            = '0'
+        MONTHS          = '1'
+        SIGNUM          = '-'
+        YEARS           ='0'
+     IMPORTING
+       CALC_DATE       = T_DATE
+            .
+     XD = T_DATE.
     WHEN '31_60'.
       F_DATE = XD - 1.
      "GET DAYS BACK
@@ -583,49 +749,49 @@ ENDIF.
          CALC_DATE       = T_DATE
                 .
      XD2 = T_DATE.
-    WHEN '91_180'.
+    WHEN '91_120'.
      F_DATE = XD2 - 1.
      "GET DAYS BACK
       CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
         EXPORTING
           DATE            = F_DATE
           DAYS            = '0'
-          MONTHS          = '3'
+          MONTHS          = '1'
           SIGNUM          = '-'
           YEARS           ='0'
        IMPORTING
          CALC_DATE       = T_DATE
                 .
      XD3 = T_DATE.
-    WHEN '181_366'.
+    WHEN '121_150'.
      F_DATE = XD3 - 1.
      "GET DAYS BACK
       CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
         EXPORTING
           DATE            = F_DATE
           DAYS            = '0'
-          MONTHS          = '6'
+          MONTHS          = '1'
           SIGNUM          = '-'
           YEARS           ='0'
        IMPORTING
          CALC_DATE       = T_DATE
                 .
      XD4 = T_DATE.
-    WHEN '1Y_1Y6M'.   "IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&Y AUDITING FOR PRO
+    WHEN '151_180'.
      F_DATE = XD4 - 1.
      "GET DAYS BACK
       CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
         EXPORTING
           DATE            = F_DATE
           DAYS            = '0'
-          MONTHS          = '6'
+          MONTHS          = '1'
           SIGNUM          = '-'
           YEARS           ='0'
        IMPORTING
          CALC_DATE       = T_DATE
                 .
      XD5 = T_DATE.
-    WHEN '1Y6M_2Y'.    "IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&Y AUDITING FOR PRO
+    WHEN '181_360'.
      F_DATE = XD5 - 1.
      "GET DAYS BACK
       CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
@@ -639,7 +805,7 @@ ENDIF.
          CALC_DATE       = T_DATE
                 .
      XD6 = T_DATE.
-    WHEN '2Y_2Y6M'.    "IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&Y AUDITING FOR PRO
+    WHEN '1Y_1Y6M'.   "IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&Y AUDITING FOR PRO
      F_DATE = XD6 - 1.
      "GET DAYS BACK
       CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
@@ -653,11 +819,37 @@ ENDIF.
          CALC_DATE       = T_DATE
                 .
      XD7 = T_DATE.
+    WHEN '1Y6M_2Y'.    "IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&Y AUDITING FOR PRO
+     F_DATE = XD7 - 1.
+     "GET DAYS BACK
+      CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = '0'
+          MONTHS          = '6'
+          SIGNUM          = '-'
+          YEARS           ='0'
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD8 = T_DATE.
+    WHEN '2Y_2Y6M'.    "IBRAHEM 09/04/2017 - ADDED BECAUSE OF E&Y AUDITING FOR PRO
+     F_DATE = XD8 - 1.
+     "GET DAYS BACK
+      CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
+        EXPORTING
+          DATE            = F_DATE
+          DAYS            = '0'
+          MONTHS          = '6'
+          SIGNUM          = '-'
+          YEARS           ='0'
+       IMPORTING
+         CALC_DATE       = T_DATE
+                .
+     XD9 = T_DATE.
     WHEN OTHERS.
       MESSAGE 'ERROR IN PERIOD CHECK YOUR ABAP CODE' TYPE 'E'.
   ENDCASE.
-
-
 
   IS_RSPAR-SELNAME = 'DATUM'.
   IS_RSPAR-KIND = 'S'.
@@ -668,11 +860,36 @@ ENDIF.
   append IS_RSPAR to IT_RSPAR.
   clear : IS_RSPAR.
 
+  "get date for stock-out calculation
+  R_DAT-LOW = T_DATE."'1000'.
+  R_DAT-HIGH = F_DATE."'1000'.
+  R_DAT-SIGN = 'I'.
+  R_DAT-OPTION = 'BT'.
+  APPEND R_DAT.
+  CLEAR R_DAT.
+
   "VALUATED STOCK
   IS_RSPAR-SELNAME = 'BWBST'.
   IS_RSPAR-KIND = 'P'.
   IS_RSPAR-LOW = 'X'.
-*  IS_RSPAR-HIGH = S_DATE-HIGH.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+*
+  "Storage loc./batch stock
+  IS_RSPAR-SELNAME = 'LGBST'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = ''.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
+
+  "Special stock
+  IS_RSPAR-SELNAME = 'SBBST'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = ''.
   IS_RSPAR-SIGN = 'I'.
   IS_RSPAR-OPTION = 'EQ'.
   append IS_RSPAR to IT_RSPAR.
@@ -695,335 +912,63 @@ ENDIF.
   IS_RSPAR-OPTION = 'EQ'.
   append IS_RSPAR to IT_RSPAR.
   clear : IS_RSPAR.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  31_60
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 31_60 .
 
-  PERFORM POPULATE_RSPAR_ITEM USING '31_60'.
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+*******Scope of List
+  IS_RSPAR-SELNAME = 'PA_WDZER'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
+  IS_RSPAR-SELNAME = 'PA_WDZEW'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
+  IS_RSPAR-SELNAME = 'PA_WDWIZ'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_3060-MATNR DUMMY WA_TMP_3060-WERKS DUMMY
-                                 WA_TMP_3060-LBKUM DUMMY WA_TMP_3060-SALK3 DUMMY.
+  IS_RSPAR-SELNAME = 'PA_WDWUW'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 
-      UNPACK WA_TMP_3060-MATNR TO WA_TMP_3060-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_3060-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_3060-SALK3 WITH ''.
-      WA_3060-MATNR = WA_TMP_3060-MATNR.
-      WA_3060-WERKS = WA_TMP_3060-WERKS.
-      WA_3060-LBKUM = WA_TMP_3060-LBKUM.
-      WA_3060-SALK3 = WA_TMP_3060-SALK3.
+  IS_RSPAR-SELNAME = 'PA_WDWEW'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 
-      APPEND WA_3060 TO IT_3060.
-      CLEAR: WA_3060, WA_TMP_3060.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  61_90
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 61_90 .
+  IS_RSPAR-SELNAME = 'PA_NDZER'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 
-  PERFORM POPULATE_RSPAR_ITEM USING '61_90' .
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
-
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
-
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
-
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_6190-MATNR DUMMY WA_TMP_6190-WERKS DUMMY
-                                 WA_TMP_6190-LBKUM DUMMY WA_TMP_6190-SALK3 DUMMY.
-
-      UNPACK WA_TMP_6190-MATNR TO WA_TMP_6190-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_6190-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_6190-SALK3 WITH ''.
-      WA_6190-MATNR = WA_TMP_6190-MATNR.
-      WA_6190-WERKS = WA_TMP_6190-WERKS.
-      WA_6190-LBKUM = WA_TMP_6190-LBKUM.
-      WA_6190-SALK3 = WA_TMP_6190-SALK3.
-
-      APPEND WA_6190 TO IT_6190.
-      CLEAR: WA_6190, WA_TMP_6190.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  91_180
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 91_180 .
-
-  PERFORM POPULATE_RSPAR_ITEM USING '91_180' .
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
-
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
-
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
-
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_91180-MATNR DUMMY WA_TMP_91180-WERKS DUMMY
-                                 WA_TMP_91180-LBKUM DUMMY WA_TMP_91180-SALK3 DUMMY.
-
-      UNPACK WA_TMP_91180-MATNR TO WA_TMP_91180-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_91180-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_91180-SALK3 WITH ''.
-      WA_91180-MATNR = WA_TMP_91180-MATNR.
-      WA_91180-WERKS = WA_TMP_91180-WERKS.
-      WA_91180-LBKUM = WA_TMP_91180-LBKUM.
-      WA_91180-SALK3 = WA_TMP_91180-SALK3.
-
-      APPEND WA_91180 TO IT_91180.
-      CLEAR: WA_91180, WA_TMP_91180.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  181_360
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 181_360 .
-
-  PERFORM POPULATE_RSPAR_ITEM USING '181_366' .
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
-
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
-
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
-
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_181360-MATNR DUMMY WA_TMP_181360-WERKS DUMMY
-                                 WA_TMP_181360-LBKUM DUMMY WA_TMP_181360-SALK3 DUMMY.
-
-      UNPACK WA_TMP_181360-MATNR TO WA_TMP_181360-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_181360-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_181360-SALK3 WITH ''.
-      WA_181360-MATNR = WA_TMP_181360-MATNR.
-      WA_181360-WERKS = WA_TMP_181360-WERKS.
-      WA_181360-LBKUM = WA_TMP_181360-LBKUM.
-      WA_181360-SALK3 = WA_TMP_181360-SALK3.
-
-      APPEND WA_181360 TO IT_181360.
-      CLEAR: WA_181360, WA_TMP_181360.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  1Y_1Y6M
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 1Y_1Y6M .
-
-  PERFORM POPULATE_RSPAR_ITEM USING '1Y_1Y6M' .
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
-
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
-
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
-
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_1Y_1Y6M-MATNR DUMMY WA_TMP_1Y_1Y6M-WERKS DUMMY
-                                 WA_TMP_1Y_1Y6M-LBKUM DUMMY WA_TMP_1Y_1Y6M-SALK3 DUMMY.
-
-      UNPACK WA_TMP_1Y_1Y6M-MATNR TO WA_TMP_1Y_1Y6M-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_1Y_1Y6M-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_1Y_1Y6M-SALK3 WITH ''.
-      WA_1Y_1Y6M-MATNR = WA_TMP_1Y_1Y6M-MATNR.
-      WA_1Y_1Y6M-WERKS = WA_TMP_1Y_1Y6M-WERKS.
-      WA_1Y_1Y6M-LBKUM = WA_TMP_1Y_1Y6M-LBKUM.
-      WA_1Y_1Y6M-SALK3 = WA_TMP_1Y_1Y6M-SALK3.
-
-      APPEND WA_1Y_1Y6M TO IT_1Y_1Y6M.
-      CLEAR: WA_1Y_1Y6M, WA_TMP_1Y_1Y6M.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  1Y6M_2Y
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 1Y6M_2Y.
-
-  PERFORM POPULATE_RSPAR_ITEM USING '1Y6M_2Y' .
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
-
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
-
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
-
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_1Y6M_2Y-MATNR DUMMY WA_TMP_1Y6M_2Y-WERKS DUMMY
-                                 WA_TMP_1Y6M_2Y-LBKUM DUMMY WA_TMP_1Y6M_2Y-SALK3 DUMMY.
-
-      UNPACK WA_TMP_1Y6M_2Y-MATNR TO WA_TMP_1Y6M_2Y-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_1Y6M_2Y-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_1Y6M_2Y-SALK3 WITH ''.
-      WA_1Y6M_2Y-MATNR = WA_TMP_1Y6M_2Y-MATNR.
-      WA_1Y6M_2Y-WERKS = WA_TMP_1Y6M_2Y-WERKS.
-      WA_1Y6M_2Y-LBKUM = WA_TMP_1Y6M_2Y-LBKUM.
-      WA_1Y6M_2Y-SALK3 = WA_TMP_1Y6M_2Y-SALK3.
-
-      APPEND WA_1Y6M_2Y TO IT_1Y6M_2Y.
-      CLEAR: WA_1Y6M_2Y, WA_TMP_1Y6M_2Y.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
-ENDFORM.
-*&---------------------------------------------------------------------*
-*&      Form  2Y_2Y6M
-*&---------------------------------------------------------------------*
-*       text
-*----------------------------------------------------------------------*
-*  -->  p1        text
-*  <--  p2        text
-*----------------------------------------------------------------------*
-FORM 2Y_2Y6M.
-
-  PERFORM POPULATE_RSPAR_ITEM USING '2Y_2Y6M' .
-  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
-
-  CALL FUNCTION 'LIST_FROM_MEMORY'
-    TABLES
-      listobject = it_list
-    EXCEPTIONS
-      not_found  = 1
-      others     = 2.
-
-  CALL FUNCTION 'LIST_TO_ASCI'
-    TABLES
-      listasci   = it_list1
-      listobject = it_list.
-
-  LOOP AT it_list1 INTO WA_LIST1.
-    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
-      CONTINUE.
-    ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP_2Y_2Y6M-MATNR DUMMY WA_TMP_2Y_2Y6M-WERKS DUMMY
-                                 WA_TMP_2Y_2Y6M-LBKUM DUMMY WA_TMP_2Y_2Y6M-SALK3 DUMMY.
-
-      UNPACK WA_TMP_2Y_2Y6M-MATNR TO WA_TMP_2Y_2Y6M-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_2Y_2Y6M-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP_2Y_2Y6M-SALK3 WITH ''.
-      WA_2Y_2Y6M-MATNR = WA_TMP_2Y_2Y6M-MATNR.
-      WA_2Y_2Y6M-WERKS = WA_TMP_2Y_2Y6M-WERKS.
-      WA_2Y_2Y6M-LBKUM = WA_TMP_2Y_2Y6M-LBKUM.
-      WA_2Y_2Y6M-SALK3 = WA_TMP_2Y_2Y6M-SALK3.
-
-      APPEND WA_2Y_2Y6M TO IT_2Y_2Y6M.
-      CLEAR: WA_2Y_2Y6M, WA_TMP_2Y_2Y6M.
-    ENDIF.
-    CLEAR WA_LIST1.
-  ENDLOOP.
-REFRESH: it_list1, IT_LIST.
+  IS_RSPAR-SELNAME = 'PA_NDSTO'.
+  IS_RSPAR-KIND = 'P'.
+  IS_RSPAR-LOW = 'X'.
+  IS_RSPAR-SIGN = 'I'.
+  IS_RSPAR-OPTION = 'EQ'.
+  append IS_RSPAR to IT_RSPAR.
+  clear : IS_RSPAR.
 ENDFORM.
 *&---------------------------------------------------------------------*
 *&      Form  GET_INITIAL_DATA
@@ -1035,17 +980,6 @@ ENDFORM.
 *----------------------------------------------------------------------*
 FORM GET_INITIAL_DATA .
 
-  "GET MATERIAL TYE DATA
-   SELECT MATNR,
-          MARA~MTART,
-          T134T~MTBEZ,
-          MARA~WRKST
-     FROM MARA INNER JOIN T134T ON MARA~MTART = T134T~MTART AND
-                                  T134T~SPRAS = @SY-LANGU
-     INTO TABLE @DATA(IT_MTART)
-     WHERE MATNR IN @S_MATNR AND
-           MARA~MTART IN @S_MTART.
-
   submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
 
   CALL FUNCTION 'LIST_FROM_MEMORY'
@@ -1064,24 +998,24 @@ FORM GET_INITIAL_DATA .
     IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
       CONTINUE.
     ELSE.
-      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_OUT-MATNR WA_OUT-MAKTX WA_OUT-WERKS WA_TMP-LBKUM
-                                 WA_TMP-LBKUM_30 WA_TMP-SALK3 WA_TMP-SALK3_30 DUMMY.
+      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP-MATNR WA_OUT-MAKTX WA_TMP-WERKS
+                                 WA_TMP-CLBKUM WA_TMP-INLBKUM WA_TMP-CSALK3 WA_TMP-INSALK3 DUMMY.
 
-      UNPACK WA_OUT-MATNR TO WA_OUT-MATNR.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-LBKUM WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-LBKUM_30 WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-SALK3 WITH ''.
-      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-SALK3_30 WITH ''.
-      WA_OUT-LBKUM = WA_TMP-LBKUM.
-      WA_OUT-LBKUM_30 = WA_TMP-LBKUM_30.
-      WA_OUT-SALK3 = WA_TMP-SALK3.
-      WA_OUT-SALK3_30 = WA_TMP-SALK3_30.
+      CALL FUNCTION 'CONVERSION_EXIT_MATN1_INPUT'
+        EXPORTING
+          INPUT              = WA_TMP-MATNR
+       IMPORTING
+         OUTPUT             = WA_OUT-MATNR
+       EXCEPTIONS
+         LENGTH_ERROR       = 1
+         OTHERS             = 2
+                .
 
-      "VALIDATE ON TOTAL RECEIPTS VS TOTAL ISSUE
-      IF WA_OUT-LBKUM_30 > WA_OUT-LBKUM.
-         WA_OUT-LBKUM_30 = WA_OUT-LBKUM.
-         WA_OUT-SALK3_30 = WA_OUT-SALK3.
-      ENDIF.
+      WA_OUT-WERKS = WA_TMP-WERKS.
+      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-CLBKUM WITH ''.
+      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-CSALK3 WITH ''.
+      WA_OUT-LBKUM = WA_TMP-CLBKUM.
+      WA_OUT-SALK3 = WA_TMP-CSALK3.
 
       DATA WA_MTART LIKE LINE OF IT_MTART.
       READ TABLE IT_MTART INTO WA_MTART WITH KEY MATNR = WA_OUT-MATNR.
@@ -1094,6 +1028,277 @@ FORM GET_INITIAL_DATA .
 
       APPEND WA_OUT TO IT_OUT.
       CLEAR: WA_OUT, WA_TMP.
+    ENDIF.
+    CLEAR WA_LIST1.
+  ENDLOOP.
+REFRESH: it_list1, IT_LIST.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  INITIAL_INFO_MSG
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM INITIAL_INFO_MSG .
+
+   "VALIDATE ON USER DECIMAL FORMAT
+ SELECT SINGLE DCPFM
+   FROM USR01
+   INTO @DATA(DEC_FORMT)
+   WHERE BNAME = @SY-UNAME.
+
+  IF DEC_FORMT <> 'X'.
+    MESSAGE 'User Decimal setting should be in format 1,234,567.89 (T-Code: SU01)' TYPE 'E' DISPLAY LIKE 'I'.
+  ENDIF.
+
+DATA IT_FINAL TYPE TABLE OF CHAR100.
+APPEND '- This report is based on MB5B report.' TO IT_FINAL.
+APPEND '- This report is to mimic FIFO inventory movement.' TO IT_FINAL.
+APPEND '- It is using /MAT_AGEING layout in Totals Only - Non-Hierarchical' TO IT_FINAL.
+APPEND '  Representation.' TO IT_FINAL.
+APPEND '- It is considering only Stock-in valuated materials movements to build ageing' TO IT_FINAL.
+APPEND '  for material.' TO IT_FINAL.
+APPEND '- In case of using (Ignore MVT) option, take care that if the ignored qty is' TO IT_FINAL.
+APPEND '  more than Stock-in qty, report will automatically discard your choice for' TO IT_FINAL.
+APPEND '  this period.' TO IT_FINAL.
+
+call function 'POPUP_WITH_TABLE_DISPLAY_OK'
+      exporting
+        endpos_col   = 100
+        endpos_row   = 15
+        startpos_col = 5
+        startpos_row = 2
+        titletext    = TEXT-002
+      tables
+        valuetab     = it_final
+      exceptions
+        break_off    = 1
+        others       = 2.
+    if sy-subrc <> 0.
+ MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+    endif.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  FILL_CTRL_TABLE
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM FILL_CTRL_TABLE .
+
+    wa_ctrl-RSPAR = '00_30'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '31_60'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '61_90'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '91_120'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '121_150'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '151_180'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '181_360'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+  IF P_EXTEND = 'X'.
+    wa_ctrl-RSPAR = '1Y_1Y6M'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '1Y6M_2Y'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+
+    wa_ctrl-RSPAR = '2Y_2Y6M'.
+    APPEND wa_ctrl TO IT_CTRL.
+    CLEAR wa_ctrl.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_WA_CTRL  text
+*----------------------------------------------------------------------*
+FORM GET_DATA  USING P_WA_CTRL TYPE CTRL.
+
+  PERFORM POPULATE_RSPAR_ITEM USING P_WA_CTRL-RSPAR.
+  submit RM07MLBD with selection-table IT_RSPAR exporting list to memory and return.
+
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      listobject = it_list
+    EXCEPTIONS
+      not_found  = 1
+      others     = 2.
+
+  CALL FUNCTION 'LIST_TO_ASCI'
+    TABLES
+      listasci   = it_list1
+      listobject = it_list.
+
+  LOOP AT it_list1 INTO WA_LIST1.
+    IF WA_LIST1 CS '------' OR SY-TABIX = 2 .
+      CONTINUE.
+    ELSE.
+      SPLIT WA_LIST1 AT '|' INTO DUMMY WA_TMP-MATNR WA_OUT-MAKTX WA_TMP-WERKS
+                                 DUMMY WA_TMP-INLBKUM DUMMY WA_TMP-INSALK3 DUMMY.
+
+      CALL FUNCTION 'CONVERSION_EXIT_MATN1_INPUT'
+        EXPORTING
+          INPUT              = WA_TMP-MATNR
+       IMPORTING
+         OUTPUT             = WA_TMP-MATNR
+       EXCEPTIONS
+         LENGTH_ERROR       = 1
+         OTHERS             = 2
+                .
+      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-INLBKUM WITH ''.
+      REPLACE ALL OCCURRENCES OF ',' IN WA_TMP-INSALK3 WITH ''.
+
+      "SUBTRACT QUANTITIES FOR SPECIFIC MOVEMENT TYPES
+      IF S_BWART-LOW IS NOT INITIAL.
+        SELECT SUM( MENGE ) AS QTY , SUM( DMBTR ) AS VALU
+          FROM MSEG
+          INTO @DATA(TMP_MSEG)
+          WHERE MATNR = @WA_TMP-MATNR AND
+                WERKS = @WA_TMP-WERKS AND
+                BWART IN @S_BWART AND
+                BUDAT_MKPF IN @R_DAT AND
+                SHKZG IN @S_SHKZG.
+          IF SY-SUBRC = 0.
+            IF WA_TMP-INLBKUM >= TMP_MSEG-QTY.
+              WA_TMP-INLBKUM = WA_TMP-INLBKUM - TMP_MSEG-QTY.
+            ENDIF.
+            IF WA_TMP-INSALK3 >= TMP_MSEG-VALU.
+              WA_TMP-INSALK3 = WA_TMP-INSALK3 - TMP_MSEG-VALU.
+            ENDIF.
+          ENDIF.
+      ENDIF.
+
+      "OVERWRITE WIT CURRENT PRICE IN CASE OF AVG MATERIAL PRICE IS USED FOR VALUATION
+      IF P_CVALUE = 'X'.
+        READ TABLE IT_MBEW INTO WA_MBEW WITH TABLE KEY MATNR = WA_TMP-MATNR BWKEY = WA_TMP-WERKS.
+        IF SY-SUBRC = 0.
+          CASE WA_MBEW-VPRSV.
+            WHEN 'S'.
+              WA_TMP-INSALK3 = WA_TMP-INLBKUM * WA_MBEW-STPRS.
+            WHEN 'V'.
+              WA_TMP-INSALK3 = WA_TMP-INLBKUM * WA_MBEW-VERPR.
+            WHEN OTHERS.
+              DATA CUR_PRICE LIKE MBEW-STPRS.
+              READ TABLE IT_OUT INTO WA_OUT WITH KEY MATNR = WA_TMP-MATNR WERKS = WA_TMP-WERKS.
+              IF SY-SUBRC = 0 AND WA_OUT-LBKUM <> 0.
+                CUR_PRICE = WA_OUT-SALK3 / WA_OUT-LBKUM.
+                WA_TMP-INSALK3 = WA_TMP-INLBKUM * CUR_PRICE.
+              ENDIF.
+          ENDCASE.
+        ELSE.
+          "GET THE UNIT PRICE OF THE KEY DATE STOCK
+          READ TABLE IT_OUT INTO WA_OUT WITH KEY MATNR = WA_TMP-MATNR WERKS = WA_TMP-WERKS.
+          IF SY-SUBRC = 0 AND WA_OUT-LBKUM <> 0.
+            CUR_PRICE = WA_OUT-SALK3 / WA_OUT-LBKUM.
+            WA_TMP-INSALK3 = WA_TMP-INLBKUM * CUR_PRICE.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+
+
+      CASE P_WA_CTRL-RSPAR.
+        WHEN '00_30'.
+          WA_0030-MATNR = WA_TMP-MATNR.
+          WA_0030-WERKS = WA_TMP-WERKS.
+          WA_0030-LBKUM = WA_TMP-INLBKUM.
+          WA_0030-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_0030 TO IT_0030.
+          CLEAR WA_0030.
+        WHEN '31_60'.
+          WA_3160-MATNR = WA_TMP-MATNR.
+          WA_3160-WERKS = WA_TMP-WERKS.
+          WA_3160-LBKUM = WA_TMP-INLBKUM.
+          WA_3160-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_3160 TO IT_3160.
+          CLEAR WA_3160.
+        WHEN '61_90'.
+          WA_6190-MATNR = WA_TMP-MATNR.
+          WA_6190-WERKS = WA_TMP-WERKS.
+          WA_6190-LBKUM = WA_TMP-INLBKUM.
+          WA_6190-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_6190 TO IT_6190.
+          CLEAR WA_6190.
+        WHEN '91_120'.
+          WA_91120-MATNR = WA_TMP-MATNR.
+          WA_91120-WERKS = WA_TMP-WERKS.
+          WA_91120-LBKUM = WA_TMP-INLBKUM.
+          WA_91120-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_91120 TO IT_91120.
+          CLEAR WA_91120.
+        WHEN '121_150'.
+          WA_121150-MATNR = WA_TMP-MATNR.
+          WA_121150-WERKS = WA_TMP-WERKS.
+          WA_121150-LBKUM = WA_TMP-INLBKUM.
+          WA_121150-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_121150 TO IT_121150.
+          CLEAR WA_121150.
+        WHEN '151_180'.
+          WA_151180-MATNR = WA_TMP-MATNR.
+          WA_151180-WERKS = WA_TMP-WERKS.
+          WA_151180-LBKUM = WA_TMP-INLBKUM.
+          WA_151180-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_151180 TO IT_151180.
+          CLEAR WA_151180.
+        WHEN '181_360'.
+          WA_181360-MATNR = WA_TMP-MATNR.
+          WA_181360-WERKS = WA_TMP-WERKS.
+          WA_181360-LBKUM = WA_TMP-INLBKUM.
+          WA_181360-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_181360 TO IT_181360.
+          CLEAR WA_181360.
+        WHEN '1Y_1Y6M'.
+          WA_1Y_1Y6M-MATNR = WA_TMP-MATNR.
+          WA_1Y_1Y6M-WERKS = WA_TMP-WERKS.
+          WA_1Y_1Y6M-LBKUM = WA_TMP-INLBKUM.
+          WA_1Y_1Y6M-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_1Y_1Y6M TO IT_1Y_1Y6M.
+          CLEAR WA_1Y_1Y6M.
+        WHEN '1Y6M_2Y'.
+          WA_1Y6M_2Y-MATNR = WA_TMP-MATNR.
+          WA_1Y6M_2Y-WERKS = WA_TMP-WERKS.
+          WA_1Y6M_2Y-LBKUM = WA_TMP-INLBKUM.
+          WA_1Y6M_2Y-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_1Y6M_2Y TO IT_1Y6M_2Y.
+          CLEAR WA_1Y6M_2Y.
+        WHEN '2Y_2Y6M'.
+          WA_2Y_2Y6M-MATNR = WA_TMP-MATNR.
+          WA_2Y_2Y6M-WERKS = WA_TMP-WERKS.
+          WA_2Y_2Y6M-LBKUM = WA_TMP-INLBKUM.
+          WA_2Y_2Y6M-SALK3 = WA_TMP-INSALK3.
+          APPEND WA_2Y_2Y6M TO IT_2Y_2Y6M.
+          CLEAR WA_2Y_2Y6M.
+      ENDCASE.
+
+      CLEAR: WA_TMP.
     ENDIF.
     CLEAR WA_LIST1.
   ENDLOOP.

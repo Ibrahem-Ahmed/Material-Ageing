@@ -1186,7 +1186,8 @@ FORM GET_DATA  USING P_WA_CTRL TYPE CTRL.
                 WERKS = @WA_TMP-WERKS AND
                 BWART IN @S_BWART AND
                 BUDAT_MKPF IN @R_DAT AND
-                SHKZG IN @S_SHKZG.
+                SHKZG = 'S' AND "DEBIT ONLY
+                XAUTO = ''.  
           IF SY-SUBRC = 0.
             IF WA_TMP-INLBKUM >= TMP_MSEG-QTY.
               WA_TMP-INLBKUM = WA_TMP-INLBKUM - TMP_MSEG-QTY.
